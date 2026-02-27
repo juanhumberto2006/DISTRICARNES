@@ -3,13 +3,23 @@
 // Configuración de la base de datos
 // ===============================
 
-$host = getenv('DB_HOST') ?: "localhost";
-$port = getenv('DB_PORT') ?: "5432"; // Puerto por defecto PostgreSQL
-$database = getenv('DB_NAME') ?: "districarnes_navarro";
-$username = getenv('DB_USER') ?: "postgres"; // Usuario por defecto
-$password = getenv('DB_PASSWORD') ?: "Luz7Noche*"; // <-- pon aquí tu clave real
+$host = getenv('DB_HOST') ?: ;
+$port = getenv('DB_PORT') ?: ; // Puerto por defecto PostgreSQL
+$database = getenv('DB_NAME') ?: ;
+$username = getenv('DB_USER') ?: ; // Usuario por defecto
+$password = getenv('DB_PASSWORD') ?: ; // <-- pon aquí tu clave real
 
 
+$conexion = new PDO(
+    "pgsql:host=$host;port=$port;dbname=$database;sslmode=require",
+    $username,
+    $password,
+    [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]
+);
+sslmode=require
 // ===============================
 // Crear conexión con PDO PostgreSQL
 // ===============================
