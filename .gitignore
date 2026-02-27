@@ -1,0 +1,27 @@
+##############################
+# Districarnes Root .gitignore
+##############################
+
+# Secrets & environment
+backend/php/openai.key
+backend/php/*.key
+.env
+.env.local
+.env.*.local
+
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Node / front cache (if any)
+node_modules/
+dist/
+build/
+
+# Composer vendor (handled elsewhere)
+vendor/
+
+# Logs
+*.log
+logs/

@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: districarnes-web
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-districarnes_navarro}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_SECRET: ${PAYPAL_SECRET:-}
+      PAYPAL_ENV: ${PAYPAL_ENV:-sandbox}
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www/html:rw
+
+  db:
+    image: postgres:15
+    container_name: districarnes-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-districarnes_navarro}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
+    driver: local
+

@@ -1,0 +1,13 @@
+node_modules
+vendor
+.git
+.gitignore
+.vscode
+*.log
+tmp
+.env
+.env.*
+Dockerfile.dev
+docker-compose.dev.yml
+**/.DS_Store
+**/Thumbs.db

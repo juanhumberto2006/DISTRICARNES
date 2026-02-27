@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DISTRICARNES - Hermanos Navarro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="shortcut icon" href="./assets/icon/image-removebg-preview sin fondo (1).ico" type="image/x-icon">
+    <link rel="stylesheet" href="./static/css/header_en_general.css" />
+    <link rel="stylesheet" href="./static/css/inicio_districarnes.css" />
+    <link rel="stylesheet" href="./static/css/chatbot.css" />
+    <link rel="stylesheet" href="./static/css/base.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="./static/css/responsive.css" />
+</head>
+
+<body class=" bg-black text-white ">
+    <!-- Header -->
+    <header class="header ">
+        <div class="header-content ">
+            <div class="logo ">
+                <img src="./assets/icon/LOGO-DISTRICARNES.png " alt="DISTRICARNES Logo ">
+            </div>
+
+            <!-- Buscador central estilo ML y pill promocional -->
+            <div class="ml-search">
+                <form action="productos.php" method="get">
+                    <input type="search" name="q" id="site-search" placeholder="Buscar productos, marcas y más…" />
+                    <button type="submit" aria-label="Buscar"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+
+
+            <!-- Enlaces rápidos + botón de carrito (siempre visibles) -->
+            <div id="quickLinks" class="ml-actions">
+                <a id="cartButton" class="ml-icon-btn ml-icon-bounce" href="./carrito-de-compras/index.html"
+                    aria-label="Carrito">
+                    <i class="bi bi-cart"></i>
+                    <span class="ml-badge" id="cartCount">0</span>
+                </a>
+                <!-- Botones de acceso y registro -->
+                <div id="authButtons" class="flex gap-3">
+                    <a href="./login/login.html" class="block">
+                        <button
+                            style="background-color: rgb(255, 0, 0); border-radius: 50px; color: white; border: 2px solid red;"
+                            onmouseover="this.style.borderColor='red'; this.style.backgroundColor='black'; this.style.color='white';"
+                            onmouseout="this.style.borderColor='red'; this.style.backgroundColor='red'; this.style.color='white';"
+                            class="bg-red-700 hover:bg-red-800 transition text-white text-sm font-semibold px-4 py-2 rounded">
+                            <i class="bi bi-box-arrow-in-right" style="font-size: 1.5rem;"></i> INICAR SESIÓN
+                        </button>
+                    </a>
+                    <a href="./login/register.html" class="block">
+                        <button
+                            style="background-color: rgb(255, 0, 0); border-radius: 50px; color: white; border: 2px solid red;"
+                            onmouseover="this.style.borderColor='red'; this.style.backgroundColor='black'; this.style.color='white';"
+                            onmouseout="this.style.borderColor='red'; this.style.backgroundColor='red'; this.style.color='white';"
+                            class="bg-red-700 hover:bg-red-800 transition text-white text-sm font-semibold px-4 py-2 rounded">
+                            <i class="bi bi-person-plus-fill" style="font-size: 1.5rem;"></i>
+                            REGISTRARSE
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+
+            <!-- Botones para usuario logueado (inicialmente ocultos) -->
+            <div id="userLoggedButtons" style="display: none; box-shadow: 0 0 20px rgba(0,0,0,0.8);">
+                <div class="user-profile-container">
+                    <button class="menu-button" onclick="toggleUserDropdown()" aria-expanded="false"
+                        aria-haspopup="true">
+                        <span class="user-avatar" id="userAvatar"></span>
+                        <span class="user-name" id="userName"></span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info-dropdown">
+                            <div class="user-avatar-large" id="userAvatarLarge"></div>
+                            <div class="user-details">
+                                <h4 id="userFullName"></h4>
+                                <p id="userEmail"></p>
+                                <span class="user-role" id="userRole"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="menu-divider"></div>
+
+                        <div class="menu-items">
+                            <a href="./perfil.html?tab=overview" class="menu-item">
+                                <i class="fas fa-user"></i>
+                                <span>Mi Perfil</span>
+                            </a>
+
+
+                            <a href="./historial.html" class="menu-item">
+                                <i class="fas fa-clock"></i> Historial de compra
+                            </a>
+                            <a href="./favoritos.html" class="menu-item">
+                                <i class="fas fa-heart"></i> Mis favoritos
+                            </a>
+                            <a href="./perfil.html?tab=edit" class="menu-item">
+                                <i class="fas fa-edit"></i>
+                                <span>Editar Perfil</span>
+                            </a>
+                            <a href="./perfil.html?tab=password" class="menu-item">
+                                <i class="fas fa-key"></i>
+                                <span>Cambiar Contraseña</span>
+                            </a>
+
+                            <a href="./perfil.html?tab=settings" class="menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Configuración</span>
+                            </a>
+
+
+                            <div class="menu-divider"></div>
+
+                            <a href="#" class="menu-item logout" onclick="logout()">
+                                <i class="fas fa-sign-out-alt" style="color: red;"></i>
+                                <span style="color: red;">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="nav-menu" id="navMenu">
+                <style>
+                    /* Contenedor centrado en la página */
+
+                    .nav-menu {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6rem;
+                        /* Increased spacing */
+                        width: 100%;
+                        max-width: 960px;
+                        /* ancho máximo del nav centrado */
+                        margin: 0 auto;
+                        /* centra horizontalmente dentro del header */
+                        box-sizing: border-box;
+                        padding: 0.25rem 0.5rem;
+                        text-align: center;
+                    }
+
+                    /* Asegura que los enlaces y botones queden centrados visualmente */
+
+                    .nav-menu>a,
+                    .nav-menu>div {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .nav-menu a {
+                        text-decoration: none;
+                        color: inherit;
+                        padding: 0.35rem 0.75rem;
+                        font-family: 'Montserrat', sans-serif;
+                        /* Applied Montserrat font */
+                    }
+
+                    /* Mantener los botones de auth alineados y centrados */
+
+                    #authButtons {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        justify-content: center;
+                    }
+
+                    /* En móvil, permitir que los elementos se apilen centrados */
+
+                    @media (max-width: 768px) {
+                        .nav-menu {
+                            justify-content: center;
+                            padding: 0.5rem;
+                        }
+
+                        /* Hacer los botones más compactos en móvil */
+                        #authButtons {
+                            width: 100%;
+                            justify-content: center;
+                            gap: 0.5rem;
+                        }
+                    }
+                </style>
+
+                <!-- Botones de navegación -->
+                <a href="./index.html" class="active">Inicio</a>
+                <a href="./productos.php">Productos</a>
+                <a href="./promociones.php">Ofertas</a>
+                <a href="./contacto.html">Contacto</a>
+                <a href="./sobre_nosotros.html">Quienes Somos</a>
+
+
+
+                <!-- Estilos y funcionalidad mejorados PARA EL MENU DEL USUARIO LOGUEADO -->
+                <style>
+                    /* Contenedor principal con fondo negro y separación de bordes */
+
+                    #userLoggedButtons {
+                        background-color: #000000;
+                        padding: 1rem;
+                        border-radius: 10px;
+                        margin: 0.5rem;
+                    }
+
+                    .user-profile-container {
+                        position: relative;
+                        display: inline-block;
+                    }
+
+                    .menu-button {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        background: linear-gradient(135deg, #000000 0%, #000000 100%);
+                        border: 2px solid #000000;
+                        border-radius: 50px;
+                        padding: 0.75rem 1.5rem;
+                        color: #ffffff;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                    }
+
+                    .menu-button:hover {
+                        border-color: #ff0000;
+                        background: linear-gradient(135deg, #000000 0%, #000000 100%);
+                        box-shadow: 0 6px 25px rgba(255, 0, 0, 0.25);
+                        transform: translateY(-2px);
+                    }
+
+                    .menu-button:active {
+                        transform: translateY(0);
+                    }
+
+                    .user-avatar {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 1.1rem;
+                        color: white;
+                        box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+                    }
+
+                    .user-name {
+                        font-size: 0.95rem;
+                        color: #f0f0f0;
+                        max-width: 120px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .dropdown-arrow {
+                        margin-left: 0.5rem;
+                        transition: transform 0.3s ease;
+                        color: #ff0000;
+                    }
+
+                    .menu-button[aria-expanded="true"] .dropdown-arrow {
+                        transform: rotate(180deg);
+                    }
+
+                    .user-dropdown {
+                        position: absolute;
+                        top: calc(100% + 12px);
+                        right: 0;
+                        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+                        border: 2px solid #333;
+                        border-radius: 16px;
+                        min-width: 280px;
+                        max-width: 320px;
+                        opacity: 0;
+                        visibility: hidden;
+                        transform: translateY(-10px);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        z-index: 1000;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                        backdrop-filter: blur(10px);
+                    }
+
+                    .user-dropdown.active {
+                        opacity: 1;
+                        visibility: visible;
+                        transform: translateY(0);
+                    }
+
+                    .user-info-dropdown {
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1.5rem;
+                        border-bottom: 1px solid #333;
+                    }
+
+                    .user-avatar-large {
+                        width: 60px;
+                        height: 60px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 1.5rem;
+                        color: white;
+                        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+                    }
+
+                    .user-details h4 {
+                        color: #ffffff;
+                        margin: 0 0 0.25rem 0;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                    }
+
+                    .user-details p {
+                        color: #cccccc;
+                        margin: 0 0 0.5rem 0;
+                        font-size: 0.85rem;
+                    }
+
+                    .user-role {
+                        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+                        color: white;
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 20px;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        display: inline-block;
+                    }
+
+                    .menu-items {
+                        padding: 0.5rem 0;
+                    }
+
+                    .menu-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        padding: 0.875rem 1.5rem;
+                        color: #e0e0e0;
+                        text-decoration: none;
+                        transition: all 0.2s ease;
+                        border-radius: 8px;
+                        margin: 0 0.5rem;
+                    }
+
+                    .menu-item:hover {
+                        background: rgba(255, 0, 0, 0.1);
+                        color: #ffffff;
+                        transform: translateX(4px);
+                    }
+
+                    .menu-item.logout {
+                        color: #ff6b6b;
+                    }
+
+                    .menu-item.logout:hover {
+                        background: rgba(255, 0, 0, 0.15);
+                        color: #ff4444;
+                    }
+
+                    .menu-item i {
+                        width: 20px;
+                        text-align: center;
+                        color: #ff0000;
+                    }
+
+                    .menu-divider {
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent 0%, #333 50%, transparent 100%);
+                        margin: 0.5rem 1.5rem;
+                    }
+
+                    @media (max-width: 768px) {
+                        .user-dropdown {
+                            right: -10px;
+                            min-width: 260px;
+                        }
+
+                        .menu-button {
+                            padding: 0.625rem 1.25rem;
+                        }
+
+                        .user-name {
+                            max-width: 80px;
+                        }
+                    }
+                </style>
+
+                <script>
+                    // Función mejorada para toggle del dropdown
+                    function toggleUserDropdown() {
+                        const dropdown = document.getElementById('userDropdown');
+                        const button = document.querySelector('.menu-button');
+                        const isOpen = dropdown.classList.contains('active');
+
+                        // Cerrar todos los dropdowns primero
+                        document.querySelectorAll('.user-dropdown').forEach(d => d.classList.remove('active'));
+                        document.querySelectorAll('.menu-button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+
+                        if (!isOpen) {
+                            dropdown.classList.add('active');
+                            button.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+
+                    document.addEventListener('click', function (event) {
+                        const container = document.querySelector('.user-profile-container');
+                        if (!container.contains(event.target)) {
+                            const dd = document.getElementById('userDropdown');
+                            if (dd) dd.classList.remove('active');
+                            const btn = document.querySelector('.menu-button');
+                            if (btn) btn.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    document.addEventListener('keydown', function (event) {
+                        if (event.key === 'Escape') {
+                            const dd = document.getElementById('userDropdown');
+                            if (dd) dd.classList.remove('active');
+                            const btn = document.querySelector('.menu-button');
+                            if (btn) btn.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    function updateUserProfile(userData) {
+                        if (!userData) return;
+                        const name = userData.name || userData.nombres_completos || 'Usuario';
+                        const initials = (name.charAt(0) || 'U').toUpperCase();
+                        const avatar = document.getElementById('userAvatar');
+                        const userName = document.getElementById('userName');
+                        const avatarLarge = document.getElementById('userAvatarLarge');
+                        const fullName = document.getElementById('userFullName');
+                        const email = document.getElementById('userEmail');
+                        const role = document.getElementById('userRole');
+
+                        if (avatar) avatar.textContent = initials;
+                        if (userName) userName.textContent = name;
+                        if (avatarLarge) avatarLarge.textContent = initials;
+                        if (fullName) fullName.textContent = userData.fullName || name;
+                        if (email) email.textContent = userData.email || userData.correo_electronico || '';
+                        if (role) role.textContent = userData.role || userData.rol || 'Usuario';
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // placeholder para posibles inicializaciones
+                    });
+
+                    // Modal y sesión
+                    function closeModal() {
+                        const modal = document.getElementById('welcomeModal');
+                        if (modal) modal.style.display = 'none';
+                    }
+
+                    window.addEventListener('load', function () {
+                        var modalEl = document.getElementById('welcomeModal');
+                        if (modalEl) modalEl.style.display = 'flex';
+                        if (window.AuthSystem && typeof AuthSystem.checkUserSession === 'function') {
+                            AuthSystem.checkUserSession();
+                        } else if (typeof checkUserSession === 'function') {
+                            checkUserSession();
+                        }
+                    });
+
+                    function checkUserSession() {
+                        const userData = localStorage.getItem('userData');
+                        const sessionData = sessionStorage.getItem('currentSession');
+
+                        if (userData || sessionData) {
+                            const raw = JSON.parse(userData || sessionData);
+                            if (raw && raw.isLoggedIn) {
+                                const currentUser = raw.user ? raw.user : raw;
+                                const authButtons = document.getElementById('authButtons');
+                                const userLoggedButtons = document.getElementById('userLoggedButtons');
+                                if (authButtons) authButtons.style.display = 'none';
+                                if (userLoggedButtons) userLoggedButtons.style.display = 'block';
+
+                                const displayName = currentUser.nombres_completos || currentUser.nombre || currentUser.correo_electronico || currentUser.email || 'Usuario';
+                                const displayEmail = currentUser.correo_electronico || currentUser.email || '';
+                                const displayRole = currentUser.rol || '';
+                                const initials = (displayName.charAt(0) || 'U').toUpperCase();
+
+                                const userAvatar = document.getElementById('userAvatar');
+                                const userName = document.getElementById('userName');
+                                const userAvatarLarge = document.getElementById('userAvatarLarge');
+                                const userFullName = document.getElementById('userFullName');
+                                const userEmail = document.getElementById('userEmail');
+                                const userRole = document.getElementById('userRole');
+
+                                if (userAvatar) userAvatar.textContent = initials;
+                                if (userName) userName.textContent = displayName;
+                                if (userAvatarLarge) userAvatarLarge.textContent = initials;
+                                if (userFullName) userFullName.textContent = displayName;
+                                if (userEmail) userEmail.textContent = displayEmail;
+                                if (userRole) userRole.textContent = displayRole ? displayRole.charAt(0).toUpperCase() + displayRole.slice(1) : '';
+                            }
+                        }
+                    }
+                </script>
+            </nav>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                <i class="fas fa-bars "></i>
+            </button>
+        </div>
+    </header>
+    <!-- Modal (se mostrará automáticamente) -->
+    <div id="welcomeModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-bg-shape"></div>
+            <div class="modal-bg-shape2"></div>
+
+            <!-- Contenedor principal horizontal -->
+            <div class="modal-body">
+                <div class="modal-text">
+                    <div class="modal-header">
+                        <h2 class="text-3xl md:text-4xl font-extrabold mb-2 ">
+                            DISTRICARNES
+                            <span class="text-red-600 italic " style="color: red;">HERMANOS NAVARRO</span>
+                        </h2>
+
+                    </div>
+                    <div class="modal-content">
+                        <p><strong>Tu carnicería favorita te da la bienvenida.</strong></p>
+                        <p>Descubre nuestra selección de cortes premium, frescos y de calidad garantizada. ¡Te esperamos
+                            con los mejores precios y atención personalizada!</p>
+                    </div>
+                    <button class="modal-button" onclick="closeModal()">Explorar Productos</button>
+                </div>
+
+                <div class="modal-image">
+                    <img src="./static/images/carnicero_navarro.png" alt="Carnicería Districarnes">
+                </div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Función para cerrar el modal
+        function closeModal() {
+            document.getElementById('welcomeModal').style.display = 'none';
+        }
+
+        // Mostrar el modal al cargar la página
+        window.onload = function () {
+            document.getElementById('welcomeModal').style.display = 'flex';
+            checkUserSession(); // Verificar sesión del usuario
+        };
+
+        // Verificar si el usuario está logueado y poblar datos del header
+        function checkUserSession() {
+            const userData = localStorage.getItem('userData');
+            const sessionData = sessionStorage.getItem('currentSession');
+
+            if (userData || sessionData) {
+                const raw = JSON.parse(userData || sessionData);
+                if (raw && raw.isLoggedIn) {
+                    const currentUser = raw.user ? raw.user : raw;
+
+                    // Ocultar elementos de autenticación en el header
+                    const authButtons = document.getElementById('authButtons');
+                    const userLoggedButtons = document.getElementById('userLoggedButtons');
+                    if (authButtons) authButtons.style.display = 'none';
+                    if (userLoggedButtons) userLoggedButtons.style.display = 'block';
+
+                    // Nombre y correo desde la BD
+                    const displayName = currentUser.nombres_completos || currentUser.nombre || currentUser.correo_electronico || currentUser.email || 'Usuario';
+                    const displayEmail = currentUser.correo_electronico || currentUser.email || '';
+                    const displayRole = currentUser.rol || '';
+                    const initials = (displayName.charAt(0) || 'U').toUpperCase();
+
+                    // Poblar elementos del menú
+                    const userAvatar = document.getElementById('userAvatar');
+                    const userName = document.getElementById('userName');
+                    const userAvatarLarge = document.getElementById('userAvatarLarge');
+                    const userFullName = document.getElementById('userFullName');
+                    const userEmail = document.getElementById('userEmail');
+                    const userRole = document.getElementById('userRole');
+
+                    if (userAvatar) userAvatar.textContent = initials;
+                    if (userName) userName.textContent = displayName;
+                    if (userAvatarLarge) userAvatarLarge.textContent = initials;
+                    if (userFullName) userFullName.textContent = displayName;
+                    if (userEmail) userEmail.textContent = displayEmail;
+                    if (userRole) userRole.textContent = displayRole ? displayRole.charAt(0).toUpperCase() + displayRole.slice(1) : '';
+
+                    // Mensaje de bienvenida
+                    const welcomeElement = document.getElementById('userWelcome');
+                    if (welcomeElement) {
+                        welcomeElement.textContent = `¡Bienvenido, ${displayName}!`;
+                    }
+                }
+            }
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            // Limpiar datos de sesión
+            localStorage.removeItem('userData');
+            sessionStorage.removeItem('currentSession');
+
+            // Mostrar elementos de login en el header
+            document.getElementById('authButtons').style.display = 'block';
+            document.getElementById('userLoggedButtons').style.display = 'none';
+
+            // Ocultar elementos al lado de la imagen
+            const heroButtons = document.getElementById('userLoggedButtonsHero');
+            if (heroButtons) {
+                heroButtons.style.display = 'none';
+            }
+
+
+        }
+    </script>
+
+
+    <!-- Hero Section  contendio donde va la imagen donde esta el titulo y el carnicero navarro -->
+    <section class="hero1section">
+        <video class="absolute inset-0 w-full h-full object-cover -z-10"
+            src="./assets/videos/6506389_Grill_Man_3840x2160.mp4" autoplay muted loop></video>
+        <section id="hero1section "
+            class=" relative max-w-7xl mx-auto px-20 py-[150px] flex flex-col md:flex-row items-center md:items-start gap-12 ">
+
+            <!--Contenido el mensaje que esta al lado del carnicero-->
+            <div class="md:w-1/2 flex flex-col justify-center space-y-4 animate-fade-in-left ">
+                <br><br><br>
+                <!--Modal para colocar distintas img de fondos con js-->
+                <h1 class="text-6xl md:text-7xl font-extrabold leading-tight animate-slide-in-down ">
+                    CARNE FRESCA, SEGURA Y DE CALIDAD
+                </h1>
+                <p class="text-gray-300 text-lg md:text-xl max-w-md animate-fade-in-up ">
+                    Selección premium de carnes, vacuno, porcino y aves.
+                    <br /> Calidad garantizada y servicio de excelencia.
+                </p>
+                <button onclick="window.location.href='productos.php'" style="background-color: red;"
+                    class="bg-red-700 hover:bg-red-800 transition flex items-center space-x-2 text-white font-semibold px-4 py-2 rounded w-max ">
+                    <i class="fas fa-shopping-cart "></i><span>Comprar online</span>
+                </button>
+            </div>
+
+
+
+            <!--imagen de carnicero navarro-->
+            <div class="md:w-1/2 relative flex items-center justify-center animate-fade-in-right ">
+                <img alt="Man in white uniform holding meat cleaver in butcher shop with blurred background lights "
+                    class="w-full max-h-[600px] object-contain rounded-md ml-2 mr-4 mt--2 mb-4 -translate-y-4 "
+                    src="./static/images/carnicero_navarro.png " />
+
+                <!-- Contenedor de elementos de usuario logueado al lado de la imagen -->
+                <div id="userLoggedButtonsHero" style="display: none;">
+                    <div class="user-info-hero">
+                        <span id="userWelcomeHero" class="user-welcome-hero"></span>
+                        <div class="nav-links-hero">
+                            <a href="productos.html">Productos</a>
+                            <a href="promociones.html">Promociones</a>
+                            <a href="contacto.html">Contacto</a>
+                            <a href="sobre_nosotros.html">Quienes Somos</a>
+                        </div>
+                        <button onclick="logout()" class="logout-btn-hero">
+                            <i class="bi bi-box-arrow-right" style="font-size: 1.2rem;"></i> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <style>
+        .hero1section {
+            background-image: url('./assets/videos/districarnes-fondo-section.mp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            z-index: -1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero1section::before {
+            content: " ";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+    </style>
+
+
+    <!-- Cómo realizar un pedido -->
+    <section class="max-w-7xl mx-auto px-6 py-12 ">
+        <h2 class="text-white font-extrabold text-xl md:text-2xl mb-8 " style="text-align: center; ">
+            ¿CÓMO PUEDES HACER TU PEDIDO?
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-gray-300 text-sm max-w-7xl mx-auto ">
+
+            <!-- Telefono -->
+            <div class="flex flex-col items-center text-center space-y-4 ">
+                <i class="fas fa-phone-alt text-red-600 text-4xl "></i>
+                <h3 class="text-white font-semibold ">
+                    Llámanos y te asesoramos al instante
+                </h3>
+                <p>
+                    La asesoría es totalmente gratuita y sin compromiso. Te ayudamos a elegir el mejor producto para ti.
+                    Recuerda que puedes pagar con tarjeta débito o crédito, efectivo o transferencia.
+                </p>
+                <p class="font-semibold text-white ">
+                    +57 301 5210177
+                </p>
+                <button onclick="window.location.href='contacto.html'" style="background-color: red;"
+                    class="bg-red-700 hover:bg-red-800 transition flex items-center space-x-2 text-white font-semibold px-4 py-2 rounded w-max ">
+                    <i class="fas fa-phone-alt "></i>
+                    <span>Llámanos al +57</span>
+                </button>
+            </div>
+
+
+            <!-- WhatsApp -->
+            <div class="flex flex-col items-center text-center space-y-4 ">
+                <!-- Sección de WhatsApp -->
+                <i class="fab fa-whatsapp text-red-600 text-4xl "></i>
+                <h3 class="text-white font-semibold ">
+                    Atención personalizada por WhatsApp
+                </h3>
+                <p>
+                    Haz tus pedidos vía WhatsApp y recibe la mejor atención personalizada. Estamos para ayudarte en todo
+                    lo que necesites.
+                </p>
+                <button
+                    onclick="window.open('https://wa.me/573108392866?text=Hola%2C%20quiero%20hacer%20un%20pedido%20de%20la%20carnicer%C3%ADa', '_blank')"
+                    style="background-color: red;"
+                    class="bg-red-700 hover:bg-red-800 transition flex items-center space-x-2 text-white font-semibold px-4 py-2 rounded w-max">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Enviar un mensaje</span>
+                </button>
+            </div>
+
+
+
+            <!-- Pedido web-->
+            <div class="flex flex-col items-center text-center space-y-4 ">
+                <!-- Sección de pedido web -->
+                <i class="fas fa-shopping-cart text-red-600 text-4xl "></i>
+                <h3 class="text-white font-semibold ">
+                    Haz tu pedido a través de la web
+                </h3>
+                <p>
+                    Puedes realizar tu compra desde la comodidad de tu casa o trabajo. Recibe tu pedido en la puerta de
+                    tu hogar.
+                </p>
+                <button onclick="window.location.href='productos.php'" style="background-color: red;"
+                    class="bg-red-700 hover:bg-red-800 transition flex items-center space-x-2 text-white font-semibold px-4 py-2 rounded w-max ">
+                    <i class="fas fa-shopping-cart "></i><span>Comprar online</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- Sección del mapa -->
+    <section class="px-4 py-8 max-w-7xl mx-auto" id="sobre_nosotros">
+        <div style="display:flex; gap:16px; align-items:stretch; flex-wrap:wrap;">
+            <div style="flex:1 1 480px; min-width:300px;">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.6586502248737!2d-75.55148638476352!3d10.39697399240679!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8ef624e4b578f21f%3A0xa6156aaebc72a220!2sDistriCarnes!5e0!3m2!1es-419!2sco!4v1688330717498!5m2!1es-419!2sco"
+                    width="100%" height="350" style="border:0; border-radius:8px;" allowfullscreen loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    aria-label="Ubicación de DistriCarnes en Cartagena, Colombia"
+                    title="Mapa de localización de DistriCarnes"></iframe>
+            </div>
+            <div
+                style="flex:1 1 320px; min-width:280px; background:#0b0b0b; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:16px; color:#fff;">
+                <h3 style="margin:0 0 8px; color:#ff0000; font-weight:800;">Ubícanos</h3>
+                <div
+                    style="display:grid; grid-template-columns:20px 1fr; gap:8px; align-items:start; margin-bottom:12px;">
+                    <div style="opacity:.9;">📍</div>
+                    <div>Olaya Herrera #34-71A-60, Cartagena de Indias, Colombia</div>
+                    <div style="opacity:.9;">⏰</div>
+                    <div>Lunes a Sábado 8:00–20:00 · Domingo 9:00–17:00</div>
+                    <div style="opacity:.9;">☎️</div>
+                    <div><a href="tel:+573015210177" style="color:#fff; text-decoration:none;">301 521 0177</a></div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <a href="https://www.google.com/maps?q=DistriCarnes+Cartagena&hl=es" target="_blank"
+                        rel="noopener noreferrer"
+                        style="background:#ff0000; color:#fff; padding:10px 14px; border-radius:999px; font-weight:700; text-decoration:none;">Ver
+                        en Google Maps</a>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=10.39697399240679,-75.55148638476352"
+                        target="_blank" rel="noopener noreferrer"
+                        style="background:#1f2937; color:#fff; padding:10px 14px; border-radius:999px; font-weight:700; text-decoration:none;">Cómo
+                        llegar</a>
+                    <a href="https://wa.me/573015210177?text=Hola%20DistriCarnes,%20quiero%20m%C3%A1s%20informaci%C3%B3n"
+                        target="_blank" rel="noopener noreferrer"
+                        style="background:#22c55e; color:#fff; padding:10px 14px; border-radius:999px; font-weight:700; text-decoration:none;">WhatsApp</a>
+                    <button type="button"
+                        onclick="(function(){var t='Olaya Herrera #34-71A-60, Cartagena de Indias, Colombia';navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){try{Swal&&Swal.fire({icon:'success',title:'Dirección copiada',timer:1500,showConfirmButton:false});}catch(e){}});})()"
+                        style="background:#374151; color:#fff; padding:10px 14px; border-radius:999px; font-weight:700; border:none; cursor:pointer;">Copiar
+                        dirección</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+
+    <!-- Formulario de contacto -->
+    <div class="contact-section">
+        <div class="contact-info">
+            <style>
+                /* Improved styling for contact form to increase padding and avoid placeholders touching borders */
+
+                .contact-form {
+                    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+                    padding: 1.75rem;
+                    border-radius: 14px;
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+                    font-family: 'Montserrat', sans-serif;
+                    margin-left: auto;
+                }
+
+                .contact-form h2 {
+                    color: #fff;
+                    margin: 0 0 0.75rem 0;
+                    font-size: 1.125rem;
+                    font-weight: 700;
+                }
+
+                .contact-form .form-group {
+                    margin-bottom: 0.95rem;
+                }
+
+                .contact-form label {
+                    display: block;
+                    margin-bottom: 0.4rem;
+                    color: rgba(255, 255, 255, 0.9);
+                    font-weight: 600;
+                    font-size: 0.88rem;
+                }
+
+                .contact-form input[type="text"],
+                .contact-form input[type="email"],
+                .contact-form textarea {
+                    width: 100%;
+                    padding: 0.9rem 1rem;
+                    /* bigger padding so placeholder doesn't touch edges */
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    background: rgba(255, 255, 255, 0.02);
+                    color: #fff;
+                    font-size: 0.95rem;
+                    line-height: 1.25;
+                    box-sizing: border-box;
+                    transition: all .18s ease-in-out;
+                    outline: none;
+                }
+
+                /* Clearer placeholder color and spacing */
+
+                .contact-form input::placeholder,
+                .contact-form textarea::placeholder {
+                    color: rgba(255, 255, 255, 0.5);
+                }
+
+                /* Focus styles: clear contrast and subtle shadow */
+
+                .contact-form input:focus,
+                .contact-form textarea:focus {
+                    border-color: rgba(255, 0, 0, 0.95);
+                    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.12);
+                    background: rgba(0, 0, 0, 0.55);
+                }
+
+                .contact-form textarea {
+                    min-height: 140px;
+                    resize: vertical;
+                }
+
+                .contact-form .form-actions {
+                    display: flex;
+                    gap: 0.6rem;
+                    align-items: center;
+                    justify-content: flex-start;
+                    margin-top: 0.6rem;
+                }
+
+                .contact-form .btn-submit {
+                    padding: 0.75rem 1.25rem;
+                    background: linear-gradient(90deg, #ff0000 0%, #b30000 100%);
+                    color: #fff;
+                    border: none;
+                    border-radius: 999px;
+                    cursor: pointer;
+                    font-weight: 700;
+                    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.18);
+                    transition: all .16s ease;
+                }
+
+                .contact-form .btn-submit:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 14px 40px rgba(255, 0, 0, 0.22);
+                }
+
+                /* Small screen handling */
+
+                @media (max-width: 768px) {
+                    .contact-form {
+                        padding: 1rem;
+                        border-radius: 10px;
+                    }
+
+                    .contact-form .form-actions {
+                        justify-content: center;
+                    }
+                }
+            </style>
+
+            <h1 class="text-white font-extrabold text-lg mb-4 " style="font-size: 2rem; color: red; ">
+                CONTÁCTENOS</h1>
+
+            <p>En <strong>Carnicería La Noble Carne</strong>, nos apasiona ofrecer cortes de carne frescos, selectos y
+                de máxima calidad. Desde hace más de 15 años, servimos a familias y chefs con productos que cumplen con
+                los más altos estándares de sabor,
+                origen y ética animal.</p>
+
+            <p>¿Tienes dudas sobre nuestros productos, horarios, delivery o necesitas un pedido especial? ¡Estamos aquí
+                para ayudarte!</p>
+
+            <div class="tagline">“Porque cada bocado merece lo mejor.”</div>
+
+            <a href="./contacto.html" class="learn-more">APRENDE MÁS</a>
+
+            <div class="footer-info">
+                <p><strong>Horario:</strong> Lunes a Sábado 8:00 AM - 8:00 PM | Domingos 9:00 AM - 5:00 PM</p>
+                <p><strong>Ubicación:</strong> Av. Principal #123, Barrio del Sabor, Ciudad Gastronómica</p>
+                <p><strong>Teléfono:</strong> +55 555 123 4567</p>
+                <p><em>Imágenes de Freepik</em></p>
+            </div>
+        </div>
+
+        <div class="contact-form">
+            <form id="contactForm" method="post" action="https://formspree.io/f/mnjbandn">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Ingresa un correo válido" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name" placeholder="Ingresa tu nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Dirección</label>
+                    <input type="text" id="address" placeholder="Ingresa tu dirección" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Mensaje</label>
+                    <textarea id="message" placeholder="Escribe tu mensaje aquí..." required></textarea>
+                </div>
+
+                <button style="background-color: red;padding: 10px 20px;border-radius: 5px "
+                    type="submit">ENVIAR</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+
+            <!-- Columna 1: Información de Contacto -->
+            <div class="footer-column">
+                <h4>INFORMACIÓN DE CONTACTO</h4>
+                <p><i class="fas fa-map-marker-alt"></i> Dirección: OLAYA HERRERA</p>
+                <p><i class="fas fa-phone"></i> Teléfono: 301 5210177</p>
+                <p><i class="fas fa-envelope"></i> Email: districarneshermanosnavarro@gmail.com</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <!-- Columna 2: Información -->
+            <div class="footer-column">
+                <h4>INFORMACIÓN</h4>
+                <ul>
+                    <li><i class="fas fa-info-circle"></i> Información Delivery</li>
+                    <li><i class="fas fa-shield-alt"></i> Políticas de Privacidad</li>
+                    <li><i class="fas fa-file-contract"></i> Términos y condiciones</li>
+                    <li><i class="fas fa-headset"></i> Contáctanos</li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Mi Cuenta -->
+            <div class="footer-column">
+                <h4>MI CUENTA</h4>
+                <ul>
+                    <li><i class="fas fa-user"></i> Mi cuenta</li>
+                    <li><i class="fas fa-history"></i> Historial de ordenes</li>
+                    <li><i class="fas fa-heart"></i> Lista de deseos</li>
+                    <li><i class="fas fa-newspaper"></i> Boletín</li>
+                    <li><i class="fas fa-undo"></i> Reembolsos</li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Boletín Informativo -->
+            <div class="footer-column">
+                <h4>BOLETÍN INFORMATIVO</h4>
+                <p>Suscríbete a nuestros boletines ahora y mantente al día con nuevas colecciones y ofertas exclusivas.
+                </p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Ingresa el correo aquí..." required />
+                    <button type="submit">SUSCRÍBETE</button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Pie inferior -->
+        <center>
+            <h4>&copy; 2026 DISTRICARNES HERMANOS NAVARRO. Todos los derechos reservados.</h4>
+        </center>
+
+    </footer>
+    <!-- CHAT BOT -->
+    <div class="chatbot-toggle" onclick="toggleChatbot()" title="Abrir chat DISTRICARNES" tabindex="0"
+        aria-label="Abrir chat DISTRICARNES">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <div class="header-info">
+                <div class="bot-avatar"><i class="fas fa-robot"></i></div>
+                <h3>DISTRICARNES HERMANOS NAVARRO</h3>
+                <p>Asistente Virtual</p>
+                <p>Tu especialista en carnes premium</p>
+            </div>
+            <button class="close-btn" onclick="toggleChatbot()" aria-label="Cerrar chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatBox">
+            <div class="message bot-message">
+                ¡Hola! 🥩 Soy tu asistente de DISTRICARNES. ¿En qué puedo ayudarte hoy?
+                <div class="menu-options">
+                    <div class="menu-option">
+                        <i class="fas fa-drumstick-bite"></i> Ver productos cárnicos
+                    </div>
+                    <div class="menu-option">
+                        <i class="fas fa-cut"></i> Tipos de cortes
+                    </div>
+                    <div class="menu-option">
+                        <i class="fas fa-clock"></i> Horarios y ubicación
+                    </div>
+                    <div class="menu-option">
+                        <i class="fas fa-tags"></i> Precios y ofertas
+                    </div>
+                    <div class="menu-option">
+                        <i class="fas fa-info-circle"></i> Sobre nosotros
+                    </div>
+                    <div class="menu-option">
+                        <i class="fas fa-phone"></i> Contactar
+                    </div>
+                </div>
+                <div class="message-timestamp">10:01 AM</div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <div class="input-container">
+                <input type="text" class="chat-input" id="userInput" placeholder="¿Qué deseas saber sobre nuestras carnes?"
+                    onkeypress="handleKeyPress(event)" autocomplete="off" />
+                <button class="voice-btn" title="Entrada de voz (No implementado)">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+               
+            </div>
+            <div class="quick-actions">
+                <button class="quick-action" onclick="handleQuickAction('productos')">
+                    <i class="fas fa-drumstick-bite"></i> Ver Productos
+                </button>
+                <button class="quick-action" onclick="handleQuickAction('horarios')">
+                    <i class="fas fa-clock"></i> Horarios
+                </button>
+                <button class="quick-action" onclick="handleQuickAction('contacto')">
+                    <i class="fas fa-phone"></i> Contacto
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="./static/js/header_actions.js"></script>
+    <script src="./static/js/index.js"></script>
+    <script src="./static/js/chatbot.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./static/js/cart_badge.js"></script>
+    <script src="./static/js/history_favorites.js"></script>
+    <script src="./static/js/loader.js" defer></script>
+    <script src="./static/js/session_guard.js" defer></script>
+    <script src="./static/js/network_guard.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toggle = document.querySelector('.chatbot-toggle');
+            var container = document.querySelector('.chatbot-container');
+            if (!toggle || !container) return;
+            function openClose(e) {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                container.classList.toggle('active');
+                if (container.classList.contains('active')) {
+                    setTimeout(function () {
+                        var input = document.getElementById('userInput') || document.querySelector('.chat-input');
+                        if (input) input.focus();
+                    }, 200);
+                }
+            }
+            toggle.addEventListener('click', openClose);
+            toggle.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') openClose(e);
+            });
+        });
+    </script>
+</body>
+
+</html>

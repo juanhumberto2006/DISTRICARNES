@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil | Districarnes</title>
+  <link rel="icon" type="image/png" href="./assets/icon/LOGO-DISTRICARNES.png" />
+  <link rel="stylesheet" href="./static/css/base.css">
+  <link rel="stylesheet" href="./static/css/header_en_general.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="./static/css/responsive.css" />
+  <style>
+    body { background:#000; color:#fff; font-family:Segoe UI, system-ui, -apple-system, Roboto, Arial, sans-serif; }
+    .page-wrap { max-width: 1020px; margin: 30px auto; padding: 0 16px; }
+    .card { background:#0a0a0a; border:1px solid #151515; border-radius:12px; box-shadow:0 10px 24px rgba(0,0,0,0.35); }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .header h1 { margin:0; font-size:1.6rem; color:#fff; }
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+    .tabs button { background:#111; color:#fff; border:1px solid #222; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer; }
+    .tabs button.active { background:#ff0000; border-color:#a20000; }
+    .content { display:none; padding:16px; }
+    .content.active { display:block; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    label { display:block; font-weight:700; color:#ddd; margin-bottom:6px; }
+    input, select, textarea { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #2a2a2a; background:#0f0f0f; color:#fff; }
+    .actions { display:flex; gap:10px; margin-top:12px; }
+    .btn { background:#c60000; color:#fff; border:none; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer; }
+    .btn.secondary { background:#222; border:1px solid #333; }
+    .note { color:#aaa; font-size:0.9rem; }
+    .settings-list { display:flex; flex-direction:column; gap:12px; }
+    .setting-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid #1d1d1d; border-radius:8px; background:#0b0b0b; }
+  </style>
+</head>
+<body>
+  <header class="header ">
+        <div class="header-content ">
+            <div class="logo ">
+                <img src="./assets/icon/LOGO-DISTRICARNES.png " alt="DISTRICARNES Logo ">
+            </div>
+
+            <!-- Buscador central estilo ML y pill promocional -->
+            <div class="ml-search">
+                <form action="productos.php" method="get">
+                    <input type="search" name="q" id="site-search" placeholder="Buscar productos, marcas y más…" />
+                    <button type="submit" aria-label="Buscar"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+
+
+            <!-- Enlaces rápidos + botón de carrito (siempre visibles) -->
+            <div id="quickLinks" class="ml-actions">
+                <a id="cartButton" class="ml-icon-btn ml-icon-bounce" href="./carrito-de-compras/index.html" aria-label="Carrito">
+                    <i class="bi bi-cart"></i>
+                    <span class="ml-badge" id="cartCount">0</span>
+                </a>
+                <!-- Botones de acceso y registro -->
+                <div id="authButtons" class="flex gap-3">
+                    <a href="./login/login.html" class="block">
+                        <button style="background-color: rgb(255, 0, 0); border-radius: 50px; color: white; border: 2px solid red;" onmouseover="this.style.borderColor='red'; this.style.backgroundColor='black'; this.style.color='white';" onmouseout="this.style.borderColor='red'; this.style.backgroundColor='red'; this.style.color='white';"
+                            class="bg-red-700 hover:bg-red-800 transition text-white text-sm font-semibold px-4 py-2 rounded">
+                            <i class="bi bi-box-arrow-in-right" style="font-size: 1.5rem;"></i> INICAR SESIÓN
+                        </button>
+                    </a>
+                    <a href="./login/register.html" class="block">
+                        <button style="background-color: rgb(255, 0, 0); border-radius: 50px; color: white; border: 2px solid red;" onmouseover="this.style.borderColor='red'; this.style.backgroundColor='black'; this.style.color='white';" onmouseout="this.style.borderColor='red'; this.style.backgroundColor='red'; this.style.color='white';"
+                            class="bg-red-700 hover:bg-red-800 transition text-white text-sm font-semibold px-4 py-2 rounded">
+                            <i class="bi bi-person-plus-fill" style="font-size: 1.5rem;"></i>
+                            REGISTRARSE
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+
+            <!-- Botones para usuario logueado (inicialmente ocultos) -->
+            <div id="userLoggedButtons" style="display: none; box-shadow: 0 0 20px rgba(0,0,0,0.8);">
+                <div class="user-profile-container">
+                    <button class="menu-button" onclick="toggleUserDropdown()" aria-expanded="false" aria-haspopup="true">
+                        <span class="user-avatar" id="userAvatar"></span>
+                        <span class="user-name" id="userName"></span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info-dropdown">
+                            <div class="user-avatar-large" id="userAvatarLarge"></div>
+                            <div class="user-details">
+                                <h4 id="userFullName"></h4>
+                                <p id="userEmail"></p>
+                                <span class="user-role" id="userRole"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="menu-divider"></div>
+
+                        <div class="menu-items">
+                            <a href="#" class="menu-item">
+                                <i class="fas fa-user"></i>
+                                <span>Mi Perfil</span>
+                            </a>
+
+
+                            <a href="./historial.html" class="menu-item">
+                                <i class="fas fa-clock"></i> Historial de compra
+                            </a>
+                            <a href="./favoritos.html" class="menu-item">
+                                <i class="fas fa-heart"></i> Mis favoritos
+                            </a>
+                            <a href="#" class="menu-item">
+                                <i class="fas fa-edit"></i>
+                                <span>Editar Perfil</span>
+                            </a>
+                            <a href="#" class="menu-item">
+                                <i class="fas fa-key"></i>
+                                <span>Cambiar Contraseña</span>
+                            </a>
+
+                            <a href="admin/admin_settings.html" class="menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Configuración</span>
+                            </a>
+
+
+                            <div class="menu-divider"></div>
+
+                            <a href="#" class="menu-item logout" onclick="logout()">
+                                <i class="fas fa-sign-out-alt" style="color: red;"></i>
+                                <span style="color: red;">Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="nav-menu" id="navMenu">
+                <style>
+                    /* Contenedor centrado en la página */
+                    
+                    .nav-menu {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6rem;
+                        /* Increased spacing */
+                        width: 100%;
+                        max-width: 960px;
+                        /* ancho máximo del nav centrado */
+                        margin: 0 auto;
+                        /* centra horizontalmente dentro del header */
+                        box-sizing: border-box;
+                        padding: 0.25rem 0.5rem;
+                        text-align: center;
+                    }
+                    /* Asegura que los enlaces y botones queden centrados visualmente */
+                    
+                    .nav-menu>a,
+                    .nav-menu>div {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    
+                    .nav-menu a {
+                        text-decoration: none;
+                        color: inherit;
+                        padding: 0.35rem 0.75rem;
+                        font-family: 'Montserrat', sans-serif;
+                        /* Applied Montserrat font */
+                    }
+                    /* Mantener los botones de auth alineados y centrados */
+                    
+                    #authButtons {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        justify-content: center;
+                    }
+                    /* En móvil, permitir que los elementos se apilen centrados */
+                    
+                    @media (max-width: 768px) {
+                        .nav-menu {
+                            justify-content: center;
+                            padding: 0.5rem;
+                        }
+                        /* Hacer los botones más compactos en móvil */
+                        #authButtons {
+                            width: 100%;
+                            justify-content: center;
+                            gap: 0.5rem;
+                        }
+                    }
+                </style>
+
+                <!-- Botones de navegación -->
+                <a href="./index.html">Inicio</a>
+                <a href="./productos.php">Productos</a>
+                <a href="./promociones.php">Ofertas</a>
+                <a href="./contacto.html" >Contacto</a>
+                <a href="./sobre_nosotros.html">Quienes Somos</a>
+
+                <h1>Mi perfil</h1>
+
+                <!-- Estilos y funcionalidad mejorados PARA EL MENU DEL USUARIO LOGUEADO -->
+                <style>
+                    /* Contenedor principal con fondo negro y separación de bordes */
+                    
+                    #userLoggedButtons {
+                        background-color: #000000;
+                        padding: 1rem;
+                        border-radius: 10px;
+                        margin: 0.5rem;
+                    }
+                    
+                    .user-profile-container {
+                        position: relative;
+                        display: inline-block;
+                    }
+                    
+                    .menu-button {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        background: linear-gradient(135deg, #000000 0%, #000000 100%);
+                        border: 2px solid #000000;
+                        border-radius: 50px;
+                        padding: 0.75rem 1.5rem;
+                        color: #ffffff;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                    }
+                    
+                    .menu-button:hover {
+                        border-color: #ff0000;
+                        background: linear-gradient(135deg, #000000 0%, #000000 100%);
+                        box-shadow: 0 6px 25px rgba(255, 0, 0, 0.25);
+                        transform: translateY(-2px);
+                    }
+                    
+                    .menu-button:active {
+                        transform: translateY(0);
+                    }
+                    
+                    .user-avatar {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 1.1rem;
+                        color: white;
+                        box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+                    }
+                    
+                    .user-name {
+                        font-size: 0.95rem;
+                        color: #f0f0f0;
+                        max-width: 120px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                    
+                    .dropdown-arrow {
+                        margin-left: 0.5rem;
+                        transition: transform 0.3s ease;
+                        color: #ff0000;
+                    }
+                    
+                    .menu-button[aria-expanded="true"] .dropdown-arrow {
+                        transform: rotate(180deg);
+                    }
+                    
+                    .user-dropdown {
+                        position: absolute;
+                        top: calc(100% + 12px);
+                        right: 0;
+                        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+                        border: 2px solid #333;
+                        border-radius: 16px;
+                        min-width: 280px;
+                        max-width: 320px;
+                        opacity: 0;
+                        visibility: hidden;
+                        transform: translateY(-10px);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        z-index: 1000;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                        backdrop-filter: blur(10px);
+                    }
+                    
+                    .user-dropdown.active {
+                        opacity: 1;
+                        visibility: visible;
+                        transform: translateY(0);
+                    }
+                    
+                    .user-info-dropdown {
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        padding: 1.5rem;
+                        border-bottom: 1px solid #333;
+                    }
+                    
+                    .user-avatar-large {
+                        width: 60px;
+                        height: 60px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 1.5rem;
+                        color: white;
+                        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+                    }
+                    
+                    .user-details h4 {
+                        color: #ffffff;
+                        margin: 0 0 0.25rem 0;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                    }
+                    
+                    .user-details p {
+                        color: #cccccc;
+                        margin: 0 0 0.5rem 0;
+                        font-size: 0.85rem;
+                    }
+                    
+                    .user-role {
+                        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+                        color: white;
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 20px;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        display: inline-block;
+                    }
+                    
+                    .menu-items {
+                        padding: 0.5rem 0;
+                    }
+                    
+                    .menu-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        padding: 0.875rem 1.5rem;
+                        color: #e0e0e0;
+                        text-decoration: none;
+                        transition: all 0.2s ease;
+                        border-radius: 8px;
+                        margin: 0 0.5rem;
+                    }
+                    
+                    .menu-item:hover {
+                        background: rgba(255, 0, 0, 0.1);
+                        color: #ffffff;
+                        transform: translateX(4px);
+                    }
+                    
+                    .menu-item.logout {
+                        color: #ff6b6b;
+                    }
+                    
+                    .menu-item.logout:hover {
+                        background: rgba(255, 0, 0, 0.15);
+                        color: #ff4444;
+                    }
+                    
+                    .menu-item i {
+                        width: 20px;
+                        text-align: center;
+                        color: #ff0000;
+                    }
+                    
+                    .menu-divider {
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent 0%, #333 50%, transparent 100%);
+                        margin: 0.5rem 1.5rem;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .user-dropdown {
+                            right: -10px;
+                            min-width: 260px;
+                        }
+                        .menu-button {
+                            padding: 0.625rem 1.25rem;
+                        }
+                        .user-name {
+                            max-width: 80px;
+                        }
+                    }
+                </style>
+
+                <script>
+                    // Función mejorada para toggle del dropdown
+                    function toggleUserDropdown() {
+                        const dropdown = document.getElementById('userDropdown');
+                        const button = document.querySelector('.menu-button');
+                        const isOpen = dropdown.classList.contains('active');
+
+                        // Cerrar todos los dropdowns primero
+                        document.querySelectorAll('.user-dropdown').forEach(d => d.classList.remove('active'));
+                        document.querySelectorAll('.menu-button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+
+                        if (!isOpen) {
+                            dropdown.classList.add('active');
+                            button.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+
+                    document.addEventListener('click', function(event) {
+                        const container = document.querySelector('.user-profile-container');
+                        if (!container.contains(event.target)) {
+                            const dd = document.getElementById('userDropdown');
+                            if (dd) dd.classList.remove('active');
+                            const btn = document.querySelector('.menu-button');
+                            if (btn) btn.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    document.addEventListener('keydown', function(event) {
+                        if (event.key === 'Escape') {
+                            const dd = document.getElementById('userDropdown');
+                            if (dd) dd.classList.remove('active');
+                            const btn = document.querySelector('.menu-button');
+                            if (btn) btn.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    function updateUserProfile(userData) {
+                        if (!userData) return;
+                        const name = userData.name || userData.nombres_completos || 'Usuario';
+                        const initials = (name.charAt(0) || 'U').toUpperCase();
+                        const avatar = document.getElementById('userAvatar');
+                        const userName = document.getElementById('userName');
+                        const avatarLarge = document.getElementById('userAvatarLarge');
+                        const fullName = document.getElementById('userFullName');
+                        const email = document.getElementById('userEmail');
+                        const role = document.getElementById('userRole');
+
+                        if (avatar) avatar.textContent = initials;
+                        if (userName) userName.textContent = name;
+                        if (avatarLarge) avatarLarge.textContent = initials;
+                        if (fullName) fullName.textContent = userData.fullName || name;
+                        if (email) email.textContent = userData.email || userData.correo_electronico || '';
+                        if (role) role.textContent = userData.role || userData.rol || 'Usuario';
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // placeholder para posibles inicializaciones
+                    });
+
+                    // Modal y sesión
+                    function closeModal() {
+                        const modal = document.getElementById('welcomeModal');
+                        if (modal) modal.style.display = 'none';
+                    }
+
+                    window.addEventListener('load', function() {
+                        var modalEl = document.getElementById('welcomeModal');
+                        if (modalEl) modalEl.style.display = 'flex';
+                        if (window.AuthSystem && typeof AuthSystem.checkUserSession === 'function') {
+                            AuthSystem.checkUserSession();
+                        } else if (typeof checkUserSession === 'function') {
+                            checkUserSession();
+                        }
+                    });
+
+                    function checkUserSession() {
+                        const userData = localStorage.getItem('userData');
+                        const sessionData = sessionStorage.getItem('currentSession');
+
+                        if (userData || sessionData) {
+                            const raw = JSON.parse(userData || sessionData);
+                            if (raw && raw.isLoggedIn) {
+                                const currentUser = raw.user ? raw.user : raw;
+                                const authButtons = document.getElementById('authButtons');
+                                const userLoggedButtons = document.getElementById('userLoggedButtons');
+                                if (authButtons) authButtons.style.display = 'none';
+                                if (userLoggedButtons) userLoggedButtons.style.display = 'block';
+
+                                const displayName = currentUser.nombres_completos || currentUser.nombre || currentUser.correo_electronico || currentUser.email || 'Usuario';
+                                const displayEmail = currentUser.correo_electronico || currentUser.email || '';
+                                const displayRole = currentUser.rol || '';
+                                const initials = (displayName.charAt(0) || 'U').toUpperCase();
+
+                                const userAvatar = document.getElementById('userAvatar');
+                                const userName = document.getElementById('userName');
+                                const userAvatarLarge = document.getElementById('userAvatarLarge');
+                                const userFullName = document.getElementById('userFullName');
+                                const userEmail = document.getElementById('userEmail');
+                                const userRole = document.getElementById('userRole');
+
+                                if (userAvatar) userAvatar.textContent = initials;
+                                if (userName) userName.textContent = displayName;
+                                if (userAvatarLarge) userAvatarLarge.textContent = initials;
+                                if (userFullName) userFullName.textContent = displayName;
+                                if (userEmail) userEmail.textContent = displayEmail;
+                                if (userRole) userRole.textContent = displayRole ? displayRole.charAt(0).toUpperCase() + displayRole.slice(1) : '';
+                            }
+                        }
+                    }
+                </script>
+            </nav>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                <i class="fas fa-bars "></i>
+            </button>
+        </div>
+    </header>
+  <div class="page-wrap">
+    
+    <div class="tabs">
+      <button data-tab="overview" class="active">Resumen</button>
+      <button data-tab="edit">Editar Perfil</button>
+      <button data-tab="password">Cambiar Contraseña</button>
+      <button data-tab="settings">Configuración</button>
+    </div>
+    <div class="card">
+      <div id="tab-overview" class="content active">
+        <div class="grid">
+          <div>
+            <label>Nombre completo</label>
+            <div id="ovName" class="note"></div>
+          </div>
+          <div>
+            <label>Correo electrónico</label>
+            <div id="ovEmail" class="note"></div>
+          </div>
+          <div>
+            <label>Rol</label>
+            <div id="ovRole" class="note"></div>
+          </div>
+        </div>
+      </div>
+      <div id="tab-edit" class="content">
+        <div class="grid">
+          <div>
+            <label for="fullName">Nombre completo</label>
+            <input type="text" id="fullName" placeholder="Tu nombre" />
+          </div>
+          <div>
+            <label for="email">Correo</label>
+            <input type="email" id="email" placeholder="tu@correo.com" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="saveProfile" class="btn">Guardar cambios</button>
+          <button id="resetProfile" class="btn secondary">Restablecer</button>
+        </div>
+        <div id="editAlert" class="note"></div>
+      </div>
+      <div id="tab-password" class="content">
+        <div class="grid">
+          <div>
+            <label for="currentPassword">Contraseña actual</label>
+            <input type="password" id="currentPassword" placeholder="Contraseña actual" />
+          </div>
+          <div>
+            <label for="newPassword">Nueva contraseña</label>
+            <input type="password" id="newPassword" placeholder="Nueva contraseña (mín. 8)" />
+          </div>
+          <div>
+            <label for="confirmPassword">Confirmar nueva contraseña</label>
+            <input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="changePassword" class="btn">Actualizar contraseña</button>
+        </div>
+        <div id="passAlert" class="note"></div>
+      </div>
+      <div id="tab-settings" class="content">
+        <div class="settings-list">
+          <div class="setting-item">
+            <div>
+              <div style="font-weight:700;color:#fff;">Notificaciones por correo</div>
+              <div class="note">Recibir avisos de ofertas y estado de pedidos</div>
+            </div>
+            <label><input type="checkbox" id="stEmailNotifs"> Activar</label>
+          </div>
+          <div class="setting-item">
+            <div>
+              <div style="font-weight:700;color:#fff;">Recordar favoritos</div>
+              <div class="note">Guardarlos en este dispositivo</div>
+            </div>
+            <label><input type="checkbox" id="stRememberFavs"> Activar</label>
+          </div>
+          <div class="setting-item">
+            <div>
+              <div style="font-weight:700;color:#fff;">Mostrar precios con IVA</div>
+              <div class="note">Aplicar IVA en el listado</div>
+            </div>
+            <label><input type="checkbox" id="stShowIVA"> Activar</label>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="saveSettings" class="btn">Guardar configuración</button>
+        </div>
+        <div id="settingsAlert" class="note"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./static/js/session_guard.js"></script>
+  <script src="./static/js/auth_utils.js"></script>
+  <script src="./static/js/user_profile.js"></script>
+  <script src="./static/js/index.js"></script>
+</body>
+</html>
