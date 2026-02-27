@@ -3,7 +3,7 @@
 // Configuración de la base de datos
 // ===============================
 
-$host = getenv('DB_HOST') ?: ;
+$host = getenv('HOST') ?: ;
 $port = getenv('DB_PORT') ?: ; // Puerto por defecto PostgreSQL
 $database = getenv('DB_NAME') ?: ;
 $username = getenv('DB_USER') ?: ; // Usuario por defecto
