@@ -67,31 +67,31 @@ try {
     // Ignorar errores al escribir log
   }
 
-  // Validar configuración SMTP (evita el error de contraseña no aceptada por valores de ejemplo)
-  $placeholderPasses = ['tu_contrasena_de_aplicacion', 'APP_PASSWORD_AQUI', ''];
-  if (SMTP_USER === 'tu_correo@gmail.com' || in_array(SMTP_PASS, $placeholderPasses, true)) {
-    echo json_encode([
-      'success' => false,
-      'message' => 'Configura SMTP con una "Contraseña de aplicación" en backend/php/email_config.php. Mientras tanto, puedes usar este enlace directo para restablecer tu contraseña.',
-      'reset_url' => $resetUrl
-    ]);
-    exit;
-  }
-
-  // Validar formato de Contraseña de aplicación de Google (16 caracteres alfanuméricos, sin espacios)
-  if (SMTP_HOST === 'smtp.gmail.com' && !preg_match('/^[A-Za-z0-9]{16}$/', SMTP_PASS)) {
-    echo json_encode([
-      'success' => false,
-      'message' => 'Tu contraseña SMTP debe ser una "Contraseña de aplicación" de 16 caracteres alfanuméricos (sin espacios). Activa 2FA y genera una nueva en Google > Seguridad.',
-      'reset_url' => $resetUrl
-    ]);
-    exit;
-  }
-
   // Seleccionar proveedor de envío (normalizado)
   $send = ['ok' => false, 'error' => ''];
   $prov = (defined('MAIL_PROVIDER') ? strtolower(trim(MAIL_PROVIDER)) : 'smtp');
   try { error_log('[reset] provider=' . $prov); } catch (Throwable $__) {}
+
+  // Solo validar SMTP si realmente se usará SMTP
+  if ($prov === 'smtp') {
+    $placeholderPasses = ['tu_contrasena_de_aplicacion', 'APP_PASSWORD_AQUI', ''];
+    if (SMTP_USER === 'tu_correo@gmail.com' || in_array(SMTP_PASS, $placeholderPasses, true)) {
+      echo json_encode([
+        'success' => false,
+        'message' => 'Configura SMTP con una "Contraseña de aplicación" en backend/php/email_config.php. Mientras tanto, puedes usar este enlace directo para restablecer tu contraseña.',
+        'reset_url' => $resetUrl
+      ]);
+      exit;
+    }
+    if (SMTP_HOST === 'smtp.gmail.com' && !preg_match('/^[A-Za-z0-9]{16}$/', SMTP_PASS)) {
+      echo json_encode([
+        'success' => false,
+        'message' => 'Tu contraseña SMTP debe ser una "Contraseña de aplicación" de 16 caracteres alfanuméricos (sin espacios). Activa 2FA y genera una nueva en Google > Seguridad.',
+        'reset_url' => $resetUrl
+      ]);
+      exit;
+    }
+  }
 
   if ($prov === 'http_brevo' && defined('BREVO_API_KEY') && BREVO_API_KEY !== '') {
     $send = http_send_mail(
