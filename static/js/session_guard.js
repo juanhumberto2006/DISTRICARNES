@@ -37,7 +37,14 @@
   }
 
   function redirectToLogin(){
-    try { location.replace('http://localhost/DISTRICARNES/index.html'); } catch(e) {}
+    try {
+      const host = (location && location.hostname) ? location.hostname.toLowerCase() : '';
+      const isRender = /onrender\.com$/.test(host);
+      const target = isRender
+        ? (location.origin + '/')
+        : (location.origin + '/DISTRICARNES/index.html');
+      location.replace(target);
+    } catch(e) {}
   }
 
   function markLoggedOut(){
@@ -72,7 +79,9 @@
     function shouldRedirect(){ return sessionStorage.getItem(LOGOUT_FLAG_KEY) === '1'; }
 
     window.addEventListener('popstate', function(){ if (shouldRedirect()) redirectToLogin(); });
-    // window.addEventListener('pageshow', function(){ if (shouldRedirect()) redirectToLogin(); });
+    window.addEventListener('pageshow', function(e){
+      if (shouldRedirect()) redirectToLogin();
+    });
 
     // Si no hay sesión y no estamos en la página de login, y existe marca de logout
     // if (!logged && !isLoginPage() && shouldRedirect()){
@@ -89,7 +98,8 @@
       const proceed = () => {
         try { markLoggedOut(); } catch(e) {}
         try { window.dispatchEvent(new CustomEvent('auth:loggedOut')); } catch(e) {}
-        try { if (typeof next === 'function') next(); } catch(e) {}
+        // No llamamos al next() para evitar redirecciones propias de páginas antiguas.
+        // La limpieza ya se realizó en markLoggedOut(); centralizamos la navegación aquí.
       };
 
       if (typeof Swal !== 'undefined' && Swal && typeof Swal.fire === 'function'){
@@ -154,11 +164,7 @@
       const isLogoutAnchor = anchor.classList.contains('logout') || href.includes('logout');
       if (isLogoutAnchor){
         e.preventDefault();
-        const boundOriginal = (typeof originalLogout === 'function') ? originalLogout.bind(anchor) : null;
-        confirmAndLogout(function(){
-          if (boundOriginal) { boundOriginal(); }
-          else if (href) { try { location.assign(href); } catch(e) {} }
-        });
+        confirmAndLogout();
       }
     }, true);
   }
