@@ -46,10 +46,11 @@ try {
     exit;
   }
 
-  // Construir enlace
+  // Construir enlace (usar ruta absoluta válida en producción)
   $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
   $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-  $resetUrl = $scheme . '://' . $host . '/DISTRICARNES/login/cambiar_contrasena.php?token=' . $token;
+  $resetPath = '/login/cambiar_contrasena.php';
+  $resetUrl = $scheme . '://' . $host . $resetPath . '?token=' . $token;
 
   // Intentar enviar correo (requiere configurar SMTP/"mail" en php.ini)
   $subject = 'Recuperación de contraseña - Districarnes';
@@ -104,9 +105,18 @@ try {
   );
 
   if (!$send['ok']) {
-    error_log('SMTP error: ' . ($send['error'] ?? 'unknown'));
-    echo json_encode(['success' => false, 'message' => 'No se pudo enviar el correo: ' . ($send['error'] ?? 'Error desconocido')]);
-  } else {
+    $err = $send['error'] ?? 'Error desconocido';
+    error_log('SMTP error: ' . $err);
+    $friendly = (strpos($err, 'Conexión fallida') !== false || strpos($err, 'timed out') !== false || strpos($err, '(110)') !== false)
+      ? 'El servidor no permite conexiones SMTP salientes. Usa el enlace directo para continuar.'
+      : 'No se pudo enviar el correo. Usa el enlace directo o intenta más tarde.';
+    echo json_encode([
+      'success' => false,
+      'message' => $friendly . ' Detalle: ' . $err,
+      'reset_url' => $resetUrl
+    ]);
+  }
+  else {
     echo json_encode(['success' => true, 'message' => 'Te enviamos el enlace para restablecer la contraseña. Revisa tu correo.']);
   }
 } catch (Throwable $e) {
