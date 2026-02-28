@@ -88,28 +88,66 @@ try {
     exit;
   }
 
-  // Enviar por SMTP (Gmail)
-  $send = smtp_send_mail(
-    $email,
-    $subject,
-    $message,
-    MAIL_FROM,
-    MAIL_FROM_NAME,
-    [
-      'host' => SMTP_HOST,
-      'port' => SMTP_PORT,
-      'secure' => SMTP_SECURE,
-      'user' => SMTP_USER,
-      'pass' => SMTP_PASS,
-    ]
-  );
+  // Seleccionar proveedor de envío (normalizado)
+  $send = ['ok' => false, 'error' => ''];
+  $prov = (defined('MAIL_PROVIDER') ? strtolower(trim(MAIL_PROVIDER)) : 'smtp');
+  try { error_log('[reset] provider=' . $prov); } catch (Throwable $__) {}
+
+  if ($prov === 'http_brevo' && defined('BREVO_API_KEY') && BREVO_API_KEY !== '') {
+    $send = http_send_mail(
+      $email,
+      $subject,
+      $message,
+      MAIL_FROM,
+      MAIL_FROM_NAME,
+      [ 'provider' => 'brevo', 'api_key' => BREVO_API_KEY ],
+      'text/plain'
+    );
+  } elseif ($prov === 'http_resend' && defined('RESEND_API_KEY') && RESEND_API_KEY !== '') {
+    $send = http_send_mail(
+      $email,
+      $subject,
+      $message,
+      MAIL_FROM,
+      MAIL_FROM_NAME,
+      [ 'provider' => 'resend', 'api_key' => RESEND_API_KEY ],
+      'text/plain'
+    );
+  } elseif ($prov === 'http_sendgrid' && defined('SENDGRID_API_KEY') && SENDGRID_API_KEY !== '') {
+    $send = http_send_mail(
+      $email,
+      $subject,
+      $message,
+      MAIL_FROM,
+      MAIL_FROM_NAME,
+      [ 'provider' => 'sendgrid', 'api_key' => SENDGRID_API_KEY ],
+      'text/plain'
+    );
+  } else {
+    $send = smtp_send_mail(
+      $email,
+      $subject,
+      $message,
+      MAIL_FROM,
+      MAIL_FROM_NAME,
+      [
+        'host' => SMTP_HOST,
+        'port' => SMTP_PORT,
+        'secure' => SMTP_SECURE,
+        'user' => SMTP_USER,
+        'pass' => SMTP_PASS,
+      ]
+    );
+  }
+  try { error_log('[reset] send_result ok=' . ($send['ok'] ? '1' : '0') . ' err=' . ($send['error'] ?? '')); } catch (Throwable $__) {}
 
   if (!$send['ok']) {
     $err = $send['error'] ?? 'Error desconocido';
     error_log('SMTP error: ' . $err);
-    $friendly = (strpos($err, 'Conexión fallida') !== false || strpos($err, 'timed out') !== false || strpos($err, '(110)') !== false)
+    $isSmtpTimeout = (strpos($err, 'Conexión fallida') !== false || strpos($err, 'timed out') !== false || strpos($err, '(110)') !== false);
+    $friendly = ($prov === 'smtp' && $isSmtpTimeout)
       ? 'El servidor no permite conexiones SMTP salientes. Usa el enlace directo para continuar.'
-      : 'No se pudo enviar el correo. Usa el enlace directo o intenta más tarde.';
+      : 'No se pudo enviar el correo (API). Usa el enlace directo o intenta más tarde.';
     echo json_encode([
       'success' => false,
       'message' => $friendly . ' Detalle: ' . $err,

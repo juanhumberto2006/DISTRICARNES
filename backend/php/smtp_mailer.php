@@ -112,4 +112,76 @@ function encode_header(string $header): string {
   return preg_match('/[\x80-\xFF]/', $header) ? '=?UTF-8?B?' . base64_encode($header) . '?=' : $header;
 }
 
+function http_send_mail(string $to, string $subject, string $body, string $from, string $fromName, array $cfg, string $contentType = 'text/plain'): array {
+  $provider = strtolower($cfg['provider'] ?? 'resend');
+  $apiKey = $cfg['api_key'] ?? '';
+  if ($apiKey === '') return ['ok' => false, 'error' => 'API key ausente'];
+  $ct = strtolower($contentType) === 'text/html' ? 'text/html' : 'text/plain';
+  $ch = curl_init();
+  if ($provider === 'sendgrid') {
+    $payload = [
+      'personalizations' => [[ 'to' => [[ 'email' => $to ]] ]],
+      'from' => [ 'email' => $from, 'name' => $fromName ],
+      'subject' => $subject,
+      'content' => [[ 'type' => $ct, 'value' => $body ]]
+    ];
+    curl_setopt_array($ch, [
+      CURLOPT_URL => 'https://api.sendgrid.com/v3/mail/send',
+      CURLOPT_POST => true,
+      CURLOPT_POSTFIELDS => json_encode($payload),
+      CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $apiKey,
+        'Content-Type: application/json'
+      ],
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_TIMEOUT => 30
+    ]);
+  } elseif ($provider === 'brevo') {
+    // Brevo (Sendinblue) API v3
+    $payload = [
+      'sender' => [ 'email' => $from, 'name' => $fromName ],
+      'to' => [[ 'email' => $to ]],
+      'subject' => $subject
+    ];
+    if ($ct === 'text/html') { $payload['htmlContent'] = $body; } else { $payload['textContent'] = $body; }
+    curl_setopt_array($ch, [
+      CURLOPT_URL => 'https://api.brevo.com/v3/smtp/email',
+      CURLOPT_POST => true,
+      CURLOPT_POSTFIELDS => json_encode($payload),
+      CURLOPT_HTTPHEADER => [
+        'api-key: ' . $apiKey,
+        'Content-Type: application/json',
+        'Accept: application/json'
+      ],
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_TIMEOUT => 30
+    ]);
+  } else {
+    $payload = [
+      'from' => "{$fromName} <{$from}>",
+      'to' => [$to],
+      'subject' => $subject
+    ];
+    if ($ct === 'text/html') { $payload['html'] = $body; } else { $payload['text'] = $body; }
+    curl_setopt_array($ch, [
+      CURLOPT_URL => 'https://api.resend.com/emails',
+      CURLOPT_POST => true,
+      CURLOPT_POSTFIELDS => json_encode($payload),
+      CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $apiKey,
+        'Content-Type: application/json'
+      ],
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_TIMEOUT => 30
+    ]);
+  }
+  $resp = curl_exec($ch);
+  $err = curl_error($ch);
+  $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
+  if ($resp === false) return ['ok' => false, 'error' => $err ?: 'Error HTTP'];
+  if ($code >= 200 && $code < 300) return ['ok' => true];
+  return ['ok' => false, 'error' => "HTTP {$code}: {$resp}"];
+}
+
 ?>
