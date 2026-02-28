@@ -67,9 +67,18 @@ try {
     // Ignorar errores al escribir log
   }
 
-  // Seleccionar proveedor de envío (normalizado)
+  // Selección automática de proveedor (prioriza API si hay claves disponibles)
   $send = ['ok' => false, 'error' => ''];
-  $prov = (defined('MAIL_PROVIDER') ? strtolower(trim(MAIL_PROVIDER)) : 'smtp');
+  $prov = 'smtp';
+  if (defined('BREVO_API_KEY') && BREVO_API_KEY !== '') {
+    $prov = 'http_brevo';
+  } elseif (defined('RESEND_API_KEY') && RESEND_API_KEY !== '') {
+    $prov = 'http_resend';
+  } elseif (defined('SENDGRID_API_KEY') && SENDGRID_API_KEY !== '') {
+    $prov = 'http_sendgrid';
+  } elseif (defined('MAIL_PROVIDER')) {
+    $prov = strtolower(trim(MAIL_PROVIDER));
+  }
   try { error_log('[reset] provider=' . $prov); } catch (Throwable $__) {}
 
   // Solo validar SMTP si realmente se usará SMTP
@@ -78,7 +87,7 @@ try {
     if (SMTP_USER === 'tu_correo@gmail.com' || in_array(SMTP_PASS, $placeholderPasses, true)) {
       echo json_encode([
         'success' => false,
-        'message' => 'Configura SMTP con una "Contraseña de aplicación" en backend/php/email_config.php. Mientras tanto, puedes usar este enlace directo para restablecer tu contraseña.',
+        'message' => 'Configura SMTP con una "Contraseña de aplicación" en backend/php/email_config.php o define una API (BREVO_API_KEY). Mientras tanto, usa el enlace directo para restablecer tu contraseña.',
         'reset_url' => $resetUrl
       ]);
       exit;
@@ -86,7 +95,7 @@ try {
     if (SMTP_HOST === 'smtp.gmail.com' && !preg_match('/^[A-Za-z0-9]{16}$/', SMTP_PASS)) {
       echo json_encode([
         'success' => false,
-        'message' => 'Tu contraseña SMTP debe ser una "Contraseña de aplicación" de 16 caracteres alfanuméricos (sin espacios). Activa 2FA y genera una nueva en Google > Seguridad.',
+        'message' => 'Tu contraseña SMTP debe ser una "Contraseña de aplicación" de 16 caracteres alfanuméricos (sin espacios). O usa una API como Brevo para evitar bloqueos de red.',
         'reset_url' => $resetUrl
       ]);
       exit;
