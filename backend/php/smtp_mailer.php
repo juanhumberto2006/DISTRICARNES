@@ -181,6 +181,12 @@ function http_send_mail(string $to, string $subject, string $body, string $from,
   curl_close($ch);
   if ($resp === false) return ['ok' => false, 'error' => $err ?: 'Error HTTP'];
   if ($code >= 200 && $code < 300) return ['ok' => true];
+  if ($provider === 'brevo' && $code === 401) {
+    $msg = 'Brevo 401: clave API inválida o ausente';
+    $j = json_decode($resp, true);
+    if (is_array($j) && isset($j['message'])) $msg .= ' - ' . $j['message'];
+    return ['ok' => false, 'error' => $msg];
+  }
   return ['ok' => false, 'error' => "HTTP {$code}: {$resp}"];
 }
 
