@@ -441,7 +441,9 @@ $ofertas = getActiveOffers($conexion);
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <img src="./assets/icon/LOGO-DISTRICARNES.png" alt="DISTRICARNES Logo">
+                <a href="./index.html">
+                    <img src="./assets/icon/LOGO-DISTRICARNES.png" alt="DISTRICARNES Logo">
+                </a>
             </div>
 
             <!-- Buscador central estilo ML y pill promocional -->
