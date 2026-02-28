@@ -15,20 +15,24 @@ html {
 }
 
 .container {
-    display: flex;
-    gap: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
     max-width: 1200px;
     width: 100%;
-    margin-top: 9.375rem;
+    margin-top: clamp(9rem, 8vw, 12rem);
     margin-left: auto;
     margin-right: auto;
+    align-items: center;
+    justify-items: center;
+    min-height: calc(100vh - 200px);
 }
 
 
 /* Left logo block */
 
 .logo-section {
-    flex: 1 1 40%;
+    width: 100%;
     background-color: transparent;
     display: flex;
     justify-content: center;
@@ -98,11 +102,13 @@ html {
 /* Right login form */
 
 .form-section {
-    flex: 1 1 60%;
-    max-width: 480px;
+    width: 100%;
+    max-width: 520px;
     display: flex;
     flex-direction: column;
     gap: 18px;
+    justify-content: center;
+    align-items: stretch;
 }
 
 label {
@@ -366,10 +372,12 @@ input[type="checkbox"]:checked+.custom-checkbox svg {
 
 @media (max-width: 992px) {
     .container {
-        gap: 40px;
-        flex-direction: column;
+        grid-template-columns: 1fr;
+        gap: 24px;
         align-items: center;
-        margin-top: 8rem;
+        justify-items: center;
+        margin-top: 7rem;
+        min-height: auto;
     }
     .logo-section,
     .form-section {
@@ -381,6 +389,10 @@ input[type="checkbox"]:checked+.custom-checkbox svg {
     .logo-container {
         max-width: 400px;
         padding: 12px 20px 18px 20px;
+    }
+    .login-container-wrapper {
+        width: 90%;
+        max-width: 520px;
     }
     .btn-login {
         width: 100%;
