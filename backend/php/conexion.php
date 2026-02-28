@@ -4,7 +4,7 @@
 // ===============================
 
 $host = getenv('HOST') ?: '';
-$port = getenv('DB_PORT') ?: '5432';
+$port = getenv('DB_PORT') ?: '6543';
 $database = getenv('DB_NAME') ?: '';
 $username = getenv('DB_USER') ?: '';
 $password = getenv('DB_PASSWORD') ?: '';
@@ -20,7 +20,13 @@ if (empty($host) || empty($database) || empty($username) || empty($password)) {
     echo json_encode([
         'success' => false,
         'message' => 'Faltan variables de entorno para la conexión.',
-        'error_details' => 'Verifica HOST, DB_NAME, DB_USER y DB_PASSWORD en Render'
+        'error_details' => 'Verifica HOST, DB_NAME, DB_USER y DB_PASSWORD en Render',
+        'debug' => [
+            'host_empty' => empty($host),
+            'database_empty' => empty($database),
+            'username_empty' => empty($username),
+            'password_empty' => empty($password)
+        ]
     ]);
     exit();
 }
@@ -46,8 +52,11 @@ if (!in_array('pgsql', PDO::getAvailableDrivers(), true)) {
 // ===============================
 
 try {
+    // DSN para Session Pooler de Supabase
+    $dsn = "pgsql:host=$host;port=$port;dbname=$database;sslmode=require";
+    
     $conexion = new PDO(
-        "pgsql:host=$host;port=$port;dbname=$database;sslmode=require",
+        $dsn,
         $username,
         $password,
         [
@@ -68,9 +77,19 @@ try {
     echo json_encode([
         'success' => false,
         'message' => 'Error de conexión a PostgreSQL.',
-        'error_details' => $e->getMessage()
+        'error_details' => $e->getMessage(),
+        'debug_info' => [
+            'host' => $host,
+            'port' => $port,
+            'database' => $database,
+            'username' => $username,
+            'dsn' => $dsn ?? 'No generado'
+        ]
     ]);
 
     exit();
 }
+
+// Si llegamos aquí, la conexión fue exitosa
+// Puedes agregar aquí tu código para consultar productos
 ?>
