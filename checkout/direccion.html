@@ -549,7 +549,7 @@
                 </div>
             </div>
             <div class="actions">
-            <button class="btn btn-primary" id="toStep2" style="background-color: #ff0000; color: #ffffff; transition: background-color 0.3s ease, transform 0.2s ease;" onmouseover="this.style.backgroundColor='#cc0000'; this.style.transform='scale(1.05)'" onmouseout="this.style.backgroundColor='#ff0000'; this.style.transform='scale(1)'">Continuar</button>
+            <button class="btn btn-primary" id="toStep2" onclick="window.__goStep && window.__goStep('stepAddress')" style="background-color: #ff0000; color: #ffffff; transition: background-color 0.3s ease, transform 0.2s ease;" onmouseover="this.style.backgroundColor='#cc0000'; this.style.transform='scale(1.05)'" onmouseout="this.style.backgroundColor='#ff0000'; this.style.transform='scale(1)'">Continuar</button>
             </div>
         </section>
 
@@ -697,6 +697,14 @@
     </main>
 
     <script>
+        // Fallback global para navegación de pasos (por si un error impide registrar listeners)
+        window.__goStep = function(id){
+            try{
+                document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+                const el = document.getElementById(id);
+                if (el){ el.classList.add('active'); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+            }catch(e){}
+        };
         // Utilidad de moneda
         function formatCurrency(n) {
             try{
