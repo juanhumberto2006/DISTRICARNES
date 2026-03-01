@@ -67,7 +67,7 @@ $companyAddress = 'Calle Principal #123, Cartagena';
 $companyNit = 'NIT 900000000-0';
 
 // Moneda
-$currency = defined('PAYPAL_CURRENCY') ? PAYPAL_CURRENCY : 'USD';
+$currency = 'COP';
 
 // Logo en base64 para embed en correo
 $root = dirname(__DIR__); // .../backend
@@ -84,15 +84,17 @@ foreach($items as $it){
   $subtotal += $line;
   $itemsHtml .= '<tr>'
     . '<td style="padding:8px;border:1px solid #ddd;">' . htmlspecialchars($it['title'] ?: 'Producto') . '</td>'
-    . '<td style="padding:8px;border:1px solid #ddd;text-align:right;">$' . number_format(floatval($it['price']), 2) . '</td>'
+    . '<td style="padding:8px;border:1px solid #ddd;text-align:right;">$' . number_format(floatval($it['price']), 0, ',', '.') . '</td>'
     . '<td style="padding:8px;border:1px solid #ddd;text-align:center;">' . intval($it['qty']) . '</td>'
-    . '<td style="padding:8px;border:1px solid #ddd;text-align:right;">$' . number_format($line, 2) . '</td>'
+    . '<td style="padding:8px;border:1px solid #ddd;text-align:right;">$' . number_format($line, 0, ',', '.') . '</td>'
     . '</tr>';
 }
-$taxRate = 0.0; // Ajusta si manejas IVA
-$tax = $subtotal * $taxRate;
+$IVA_RATE = 0.19; // IVA Colombia 19%
+// Asumimos precios con IVA incluido: extraer base e impuesto
+$base = $subtotal / (1 + $IVA_RATE);
+$tax = max(0, $subtotal - $base);
 $total = floatval($order['total']);
-if($total <= 0){ $total = $subtotal + $tax; }
+if($total <= 0){ $total = $subtotal; }
 
 $addrText = '';
 if(is_array($address)){
@@ -120,7 +122,11 @@ $html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="
   . '<p class="meta">Fecha: ' . htmlspecialchars(date('Y-m-d H:i', strtotime($order['created_at']))) . ' • Pago: PayPal' . (!empty($order['paypal_id']) ? (' • Transacción ' . htmlspecialchars($order['paypal_id'])) : '') . '</p>'
   . (!empty($order['factus_number']) || !empty($order['factus_invoice_id']) ? ('<p class="meta">Factura electrónica Factus: <strong>' . htmlspecialchars($order['factus_number'] ?: $order['factus_invoice_id']) . '</strong>' . (!empty($order['factus_pdf_url']) ? (' • <a href="' . htmlspecialchars($order['factus_pdf_url']) . '" target="_blank">Descargar PDF</a>') : '') . '</p>') : '')
   . '<table><thead><tr><th>Producto</th><th style="text-align:right;">Precio (' . htmlspecialchars($currency) . ')</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Subtotal</th></tr></thead><tbody>' . $itemsHtml . '</tbody></table>'
-  . '<table class="totals"><tr><td style="text-align:right;">Subtotal: $' . number_format($subtotal,2) . '</td></tr><tr><td style="text-align:right;">Impuestos: $' . number_format($tax,2) . '</td></tr><tr><td style="text-align:right;"><strong>Total: $' . number_format($total,2) . '</strong></td></tr></table>'
+  . '<table class="totals">'
+    . '<tr><td style="text-align:right;">Base (sin IVA): $' . number_format($base, 0, ',', '.') . '</td></tr>'
+    . '<tr><td style="text-align:right;">IVA (19% incluido): $' . number_format($tax, 0, ',', '.') . '</td></tr>'
+    . '<tr><td style="text-align:right;"><strong>Total: $' . number_format($total, 0, ',', '.') . '</strong></td></tr>'
+  . '</table>'
   . '<p style="margin-top:14px;color:#555;">Método de entrega: ' . htmlspecialchars($order['delivery_method']) . '</p>'
   . '<div class="footer"><p>Gracias por tu compra. Conserva esta factura para tus registros.</p><p>Este documento corresponde a una factura de venta emitida por ' . htmlspecialchars($companyName) . '. Ante cualquier inquietud contáctanos: ' . htmlspecialchars($companyEmail) . '.</p><p>Dirección: ' . htmlspecialchars($companyAddress) . ' • Tel: ' . htmlspecialchars($companyPhone) . '.</p></div>'
   . '</body></html>';

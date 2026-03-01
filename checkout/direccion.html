@@ -686,8 +686,12 @@
                 <span style="color:#000;" id="summarySubtotal">$0</span>
             </div>
             <div class="summary-row">
+                <span style="color:#000;">IVA (incluido)</span>
+                <span style="color:#000;" id="summaryTax">$0</span>
+            </div>
+            <div class="summary-row">
                 <span style="color:#000;">Envío</span>
-                <span class="badge-free">Gratis</span>
+                <span style="color:#000;" id="summaryShipping">Gratis</span>
             </div>
             <div class="summary-row">
                 <span style="color:#000;">Total</span>
@@ -875,6 +879,10 @@
                 const qty = Number(i.qty || i.quantity || 1);
                 return sum + (price * qty);
             }, 0);
+            // IVA incluido (asumimos precios con IVA): 19%
+            const IVA_RATE = 0.19;
+            const base = subtotal / (1 + IVA_RATE);
+            const tax = Math.max(0, subtotal - base);
             // Cotizar envío en backend según reglas
             let shipping = 0;
             try {
@@ -889,6 +897,10 @@
             const total = subtotal + shipping;
             document.getElementById('itemsCount').textContent = String(items.length);
             document.getElementById('summarySubtotal').textContent = formatCurrency(subtotal);
+            const taxEl = document.getElementById('summaryTax');
+            if (taxEl) taxEl.textContent = formatCurrency(tax);
+            const shipEl = document.getElementById('summaryShipping');
+            if (shipEl) shipEl.textContent = shipping > 0 ? formatCurrency(shipping) : 'Gratis';
             document.getElementById('summaryTotal').textContent = formatCurrency(total);
             CheckoutState.orderTotal = total;
         }

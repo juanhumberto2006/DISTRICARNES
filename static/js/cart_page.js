@@ -97,13 +97,30 @@
     render();
   }
 
-  function recalcTotals(){
+  async function recalcTotals(){
     const items = getCart();
     const subtotal = items.reduce((sum,i)=> sum + (Number(i.price||0) * Number(i.qty||1)), 0);
-    const shipping = subtotal >= 100 ? 0 : (items.length ? 10 : 0);
+    // IVA incluido (asumiendo precios con IVA): 19% por defecto
+    const IVA_RATE = 0.19;
+    const base = subtotal / (1 + IVA_RATE);
+    const tax = Math.max(0, subtotal - base);
+    // Cotizar envío real con backend (estimación: domicilio)
+    let shipping = 0;
+    try{
+      const res = await fetch('../backend/php/shipping_quote.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ items, delivery: 'domicilio' })
+      });
+      const out = await res.json();
+      if(out && out.ok){ shipping = Number(out.cost||0); }
+    }catch(e){ shipping = 0; }
     const total = subtotal + shipping;
     document.getElementById('subtotal').textContent = formatCurrency(subtotal);
-    document.getElementById('shipping').textContent = formatCurrency(shipping);
+    const taxEl = document.getElementById('tax');
+    if (taxEl) taxEl.textContent = formatCurrency(tax);
+    const shippingEl = document.getElementById('shipping');
+    if (shippingEl) shippingEl.textContent = shipping > 0 ? formatCurrency(shipping) : 'Gratis';
     document.getElementById('total').textContent = formatCurrency(total);
   }
 
