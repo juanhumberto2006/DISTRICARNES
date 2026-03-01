@@ -1,70 +1,75 @@
 <?php
-// Página HTML de factura imprimible (profesional)
-require_once __DIR__ . '/conexion.php';
+// Página HTML de factura imprimible (formato profesional, español, QR)
+require_once __DIR__ . '/conexion.php';          // PDO (PostgreSQL)
 require_once __DIR__ . '/paypal_config.php';
+require_once __DIR__ . '/factus_config.php';     // Datos de empresa
 
 $orderId = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
-if($orderId <= 0){ http_response_code(400); echo 'order_id requerido'; exit; }
+if ($orderId <= 0) { http_response_code(400); echo 'order_id requerido'; exit; }
 
-// Asegurar columnas opcionales de Factus existen para evitar errores y duplicados
-function getColumns(mysqli $db, string $table): array {
-  $cols = [];
-  if ($res = $db->query("DESCRIBE `$table`")) {
-    while ($row = $res->fetch_assoc()) { $cols[] = $row['Field']; }
-    $res->close();
-  }
-  return $cols;
+function money_es($n) {
+  // Formato español: separador miles '.', decimales ','
+  return '$' . number_format((float)$n, 0, ',', '.');
 }
 
-function ensureFactusColumns(mysqli $db): void {
-  $cols = getColumns($db, 'orders');
-  $alterParts = [];
-  if (!in_array('factus_invoice_id', $cols, true)) { $alterParts[] = 'ADD COLUMN factus_invoice_id VARCHAR(128) NULL'; }
-  if (!in_array('factus_number', $cols, true)) { $alterParts[] = 'ADD COLUMN factus_number VARCHAR(128) NULL'; }
-  if (!in_array('factus_status', $cols, true)) { $alterParts[] = 'ADD COLUMN factus_status VARCHAR(32) NULL'; }
-  if (!in_array('factus_pdf_url', $cols, true)) { $alterParts[] = 'ADD COLUMN factus_pdf_url TEXT NULL'; }
-  if (!empty($alterParts)) {
-    $db->query('ALTER TABLE orders ' . implode(', ', $alterParts));
-  }
-}
-
-ensureFactusColumns($conexion);
-
-$stmt = $conexion->prepare("SELECT id, paypal_id, user_email, user_name, status, total, delivery_method, address_json, schedule_json, created_at, factus_invoice_id, factus_number, factus_status, factus_pdf_url FROM orders WHERE id = ?");
-$stmt->bind_param('i', $orderId);
-$stmt->execute();
-$res = $stmt->get_result();
-$order = $res->fetch_assoc();
-$stmt->close();
-if(!$order){ http_response_code(404); echo 'Orden no encontrada'; exit; }
-
-$stmtI = $conexion->prepare("SELECT title, price, qty, image FROM order_items WHERE order_id = ?");
-$stmtI->bind_param('i', $orderId);
-$stmtI->execute();
-$itemsRes = $stmtI->get_result();
+// Cargar orden e ítems desde orders_pg/order_items_pg (PostgreSQL) o, si no existen, intentar 'orders'/'order_items'
+$order = null;
 $items = [];
-while($it = $itemsRes->fetch_assoc()){ $items[] = $it; }
-$stmtI->close();
+try {
+  $stmt = $conexion->prepare('SELECT id, paypal_id, user_email, user_name, status, total, delivery_method, address_json, schedule_json, created_at, factus_invoice_id, factus_number, factus_status, factus_pdf_url FROM orders_pg WHERE id = ?');
+  $stmt->execute([$orderId]);
+  $order = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($order) {
+    $stmtI = $conexion->prepare('SELECT title, price, qty, image FROM order_items_pg WHERE order_id = ?');
+    $stmtI->execute([$orderId]);
+    $items = $stmtI->fetchAll(PDO::FETCH_ASSOC);
+  }
+} catch (Throwable $e) { /* fallback abajo */ }
 
-$address = $order['address_json'] ? json_decode($order['address_json'], true) : [];
-$schedule = $order['schedule_json'] ? json_decode($order['schedule_json'], true) : [];
+if (!$order) {
+  try {
+    $stmt = $conexion->prepare('SELECT id, paypal_id, user_email, user_name, status, total, delivery_method, address_json, schedule_json, created_at, factus_invoice_id, factus_number, factus_status, factus_pdf_url FROM orders WHERE id = ?');
+    $stmt->execute([$orderId]);
+    $order = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($order) {
+      $stmtI = $conexion->prepare('SELECT title, price, qty, image FROM order_items WHERE order_id = ?');
+      $stmtI->execute([$orderId]);
+      $items = $stmtI->fetchAll(PDO::FETCH_ASSOC);
+    }
+  } catch (Throwable $e) { /* si no existe, caerá abajo */ }
+}
 
-// Datos empresa
-$companyName = 'DistriCarnes Hermanos Navarro';
-$companyEmail = 'soporte@districarnes.local';
-$companyPhone = '+57 300 000 0000';
-$companyAddress = 'Calle Principal #123, Cartagena';
-$companyNit = 'NIT 900000000-0';
+if (!$order) { http_response_code(404); echo 'Orden no encontrada'; exit; }
 
-// Moneda
-$currency = defined('PAYPAL_CURRENCY') ? PAYPAL_CURRENCY : 'USD';
+$address  = !empty($order['address_json']) ? (json_decode($order['address_json'], true) ?: []) : [];
+$schedule = !empty($order['schedule_json']) ? (json_decode($order['schedule_json'], true) ?: []) : [];
 
+// Datos empresa (desde factus_config si existen, con fallbacks)
+$companyName    = defined('FACTUS_COMPANY_NAME') ? FACTUS_COMPANY_NAME : 'DistriCarnes Hermanos Navarro';
+$companyEmail   = defined('FACTUS_COMPANY_EMAIL') ? FACTUS_COMPANY_EMAIL : 'districarneshermanosnavarro@gmail.com';
+$companyPhone   = defined('FACTUS_COMPANY_PHONE') ? FACTUS_COMPANY_PHONE : '+57 301 5210177';
+$companyAddress = defined('FACTUS_COMPANY_ADDRESS') ? FACTUS_COMPANY_ADDRESS : 'OLAYA HERRERA, Cartagena de Indias';
+$companyNit     = defined('FACTUS_COMPANY_NIT') ? ('NIT ' . FACTUS_COMPANY_NIT) : 'NIT 900000000-0';
+
+// Moneda y cálculos
+$currency = 'COP';
 $subtotal = 0.0;
-foreach($items as $it){ $subtotal += floatval($it['price']) * intval($it['qty']); }
-$taxRate = 0.0; $tax = $subtotal * $taxRate; $total = floatval($order['total']); if($total <= 0){ $total = $subtotal + $tax; }
+foreach ($items as $it) { $subtotal += (float)($it['price'] ?? 0) * (int)($it['qty'] ?? 1); }
+$taxRate = 0.0; // Ajustar si manejas IVA
+$tax = $subtotal * $taxRate;
+$total = (float)($order['total'] ?? 0);
+if ($total <= 0) { $total = $subtotal + $tax; }
 
-// Código único de factura (determinístico por orden)
-$invoiceCode = 'FAC-' . date('Ymd', strtotime($order['created_at'])) . '-' . strtoupper(base_convert($orderId, 10, 36));
+// Número/Código de factura (único por orden)
+$createdAt = !empty($order['created_at']) ? strtotime($order['created_at']) : time();
+$invoiceCode = 'FAC-' . date('Ymd', $createdAt) . '-' . strtoupper(base_convert($orderId, 10, 36));
+
+// URL absoluta de la factura para QR
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/backend/php/order_invoice.php'), '/');
+$invoiceUrl = $scheme . '://' . $host . $base . '/order_invoice.php?order_id=' . urlencode((string)$orderId);
+$qrUrl = 'https://chart.googleapis.com/chart?chs=160x160&cht=qr&choe=UTF-8&chl=' . urlencode($invoiceUrl);
 
 ?><!DOCTYPE html>
 <html lang="es">
@@ -74,12 +79,12 @@ $invoiceCode = 'FAC-' . date('Ymd', strtotime($order['created_at'])) . '-' . str
   <title>Factura <?php echo htmlspecialchars($invoiceCode); ?> • DistriCarnes</title>
   <style>
     body { font-family: Arial, Helvetica, sans-serif; color:#222; margin:24px; }
-    .header { display:flex; justify-content:space-between; align-items:center; }
+    .header { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; }
     .brand { display:flex; align-items:center; gap:12px; }
-    .brand img { height:56px; }
+    .brand img { height:56px; object-fit:contain; }
     .company { line-height:1.4; }
     .customer { line-height:1.4; text-align:right; }
-    h1 { margin:0 0 4px 0; font-size:22px; }
+    h1 { margin:0 0 4px 0; font-size:22px; text-transform:uppercase; letter-spacing:.3px; }
     .meta { margin-top:6px; color:#666; }
     table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #e5e5e5; }
@@ -100,7 +105,14 @@ $invoiceCode = 'FAC-' . date('Ymd', strtotime($order['created_at'])) . '-' . str
   </div>
   <div class="header">
     <div class="brand">
-      
+      <?php
+        $root = dirname(__DIR__);
+        $logoPath = $root . '/assets/icon/LOGO-DISTRICARNES.png';
+        if (file_exists($logoPath)) {
+          $logoData = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+          echo '<img src="'.$logoData.'" alt="DistriCarnes"/>';
+        }
+      ?>
       <div class="company">
         <h1>Factura <?php echo htmlspecialchars($invoiceCode); ?></h1>
         <div><strong><?php echo htmlspecialchars($companyName); ?></strong></div>
@@ -109,16 +121,18 @@ $invoiceCode = 'FAC-' . date('Ymd', strtotime($order['created_at'])) . '-' . str
         <div>Tel: <?php echo htmlspecialchars($companyPhone); ?> • Email: <?php echo htmlspecialchars($companyEmail); ?></div>
         <div class="meta">Moneda: <?php echo htmlspecialchars($currency); ?></div>
       </div>
-      
     </div>
-    
+    <div>
+      <img src="<?php echo htmlspecialchars($qrUrl); ?>" alt="QR Factura" style="width:120px;height:120px;border:1px solid #eee;padding:4px;border-radius:6px;">
+      <div class="meta" style="text-align:center;margin-top:4px;">Escanéame</div>
+    </div>
     <div class="customer">
       <div><strong>Cliente</strong></div>
       <div><?php echo htmlspecialchars($order['user_name'] ?: ''); ?></div>
       <div><?php echo htmlspecialchars($order['user_email'] ?: ''); ?></div>
       <div><?php echo htmlspecialchars(($address['street'] ?? '') . ', ' . ($address['city'] ?? '') . ', ' . ($address['dept'] ?? '')); ?></div>
-      <div>Fecha: <?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($order['created_at']))); ?></div>
-      <div class="meta">Pago: PayPal <?php if(!empty($order['paypal_id'])){ echo '• Transacción ' . htmlspecialchars($order['paypal_id']); } ?></div>
+      <div>Fecha: <?php echo htmlspecialchars(date('Y-m-d H:i', $createdAt)); ?></div>
+      <div class="meta">Pago: <?php echo htmlspecialchars($order['paypal_id'] ? 'PayPal' : ($order['pay_method'] ?? '')); ?><?php if(!empty($order['paypal_id'])){ echo ' • Transacción ' . htmlspecialchars($order['paypal_id']); } ?></div>
       <div class="meta">Estado: <span class="badge badge-paid"><?php echo htmlspecialchars($order['status']); ?></span></div>
       <?php if(!empty($order['factus_number']) || !empty($order['factus_invoice_id'])): ?>
         <div class="meta">Factura electrónica Factus: <strong><?php echo htmlspecialchars($order['factus_number'] ?: $order['factus_invoice_id']); ?></strong></div>
@@ -140,20 +154,20 @@ $invoiceCode = 'FAC-' . date('Ymd', strtotime($order['created_at'])) . '-' . str
       </tr>
     </thead>
     <tbody>
-      <?php foreach($items as $it): $line = floatval($it['price']) * intval($it['qty']); ?>
+      <?php foreach($items as $it): $line = (float)($it['price'] ?? 0) * (int)($it['qty'] ?? 1); ?>
       <tr>
-        <td><?php echo htmlspecialchars($it['title'] ?: 'Producto'); ?></td>
-        <td style="text-align:right;">$<?php echo number_format(floatval($it['price']),2); ?></td>
-        <td style="text-align:center;"><?php echo intval($it['qty']); ?></td>
-        <td style="text-align:right;">$<?php echo number_format($line,2); ?></td>
+        <td><?php echo htmlspecialchars(($it['title'] ?? '') ?: 'Producto'); ?></td>
+        <td style="text-align:right;"><?php echo money_es($it['price'] ?? 0); ?></td>
+        <td style="text-align:center;"><?php echo intval($it['qty'] ?? 1); ?></td>
+        <td style="text-align:right;"><?php echo money_es($line); ?></td>
       </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
   <table class="totals">
-    <tr><td style="text-align:right;">Subtotal: $<?php echo number_format($subtotal,2); ?></td></tr>
-    <tr><td style="text-align:right;">Impuestos: $<?php echo number_format($tax,2); ?></td></tr>
-    <tr><td style="text-align:right;"><strong>Total: $<?php echo number_format($total,2); ?></strong></td></tr>
+    <tr><td style="text-align:right;">Subtotal: <?php echo money_es($subtotal); ?></td></tr>
+    <tr><td style="text-align:right;">Impuestos: <?php echo money_es($tax); ?></td></tr>
+    <tr><td style="text-align:right;"><strong>Total: <?php echo money_es($total); ?></strong></td></tr>
   </table>
   <?php
     $delivery = $order['delivery_method'] ?: 'domicilio';
@@ -184,6 +198,7 @@ $invoiceCode = 'FAC-' . date('Ymd', strtotime($order['created_at'])) . '-' . str
     <p>Gracias por tu compra. Conserva esta factura para tus registros.</p>
     <p>Este documento corresponde a una factura de venta emitida por <?php echo htmlspecialchars($companyName); ?>. Ante cualquier inquietud contáctanos: <?php echo htmlspecialchars($companyEmail); ?>.</p>
     <p>Dirección: <?php echo htmlspecialchars($companyAddress); ?> • Tel: <?php echo htmlspecialchars($companyPhone); ?>.</p>
+    <p>Código de verificación: <strong><?php echo htmlspecialchars($invoiceCode); ?></strong> • Escanea el QR para ver esta factura.</p>
   </div>
 
   <script>
