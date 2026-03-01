@@ -828,7 +828,7 @@
         }
 
         // Totales
-        function recalcSummary() {
+        async function recalcSummary() {
             const items = getCart();
             const subtotal = items.reduce((sum, i) => {
                 const price = (typeof i.price === 'string') ? safeParsePrice(i.price) : Number(i.price || 0);
