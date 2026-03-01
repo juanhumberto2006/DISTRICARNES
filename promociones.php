@@ -442,7 +442,7 @@ $ofertas = getActiveOffers($conexion);
         <div class="header-content">
             <div class="logo">
                 <a href="./index.html">
-                    <img src="./assets/icon/LOGO-DISTRICARNES.png" alt="DISTRICARNES Logo">
+                    <img src="./assets/icon/LOGO-DISTRICARNES.png" alt="DISTRICARNES Logo" style="cursor: pointer;">
                 </a>
             </div>
 
