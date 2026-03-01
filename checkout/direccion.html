@@ -723,18 +723,40 @@
 
         // Leer carrito (persistencia por usuario)
         function getUserKey() {
+            // 1) Intentar sistema global si existe
+            try {
+                if (window.AuthSystem) {
+                    const u = (typeof window.AuthSystem.getCurrentUser === 'function') ? window.AuthSystem.getCurrentUser() : null;
+                    if (u) {
+                        const email = (u.correo_electronico || u.email) || '';
+                        const id = (u.id_usuario || u.id) || '';
+                        const key = email || String(id || '').trim();
+                        if (key) return key;
+                    }
+                }
+            } catch(e) {}
+            // 2) Fallback a userData / currentSession
             try {
                 const rawStr = localStorage.getItem('userData') || sessionStorage.getItem('currentSession');
-                if (!rawStr) return null;
-                const raw = JSON.parse(rawStr);
-                const user = raw && raw.user ? raw.user : raw;
-                const email = (user && (user.correo_electronico || user.email)) || '';
-                const id = (user && (user.id_usuario || user.id)) || '';
-                const key = email || String(id || '').trim();
-                return key || null;
-            } catch (e) {
-                return null;
-            }
+                if (rawStr) {
+                    const raw = JSON.parse(rawStr);
+                    const user = raw && raw.user ? raw.user : raw;
+                    const email = (user && (user.correo_electronico || user.email)) || '';
+                    const id = (user && (user.id_usuario || user.id)) || '';
+                    const key = email || String(id || '').trim();
+                    if (key) return key;
+                }
+            } catch (e) {}
+            // 3) Último recurso: detectar primer carrito existente en localStorage
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('cart_items:')) {
+                        return k.substring('cart_items:'.length);
+                    }
+                }
+            } catch (e) {}
+            return null;
         }
 
         function getCartKey() {
@@ -743,10 +765,20 @@
         }
 
         function getCart() {
-            const key = getCartKey();
+            let key = getCartKey();
+            if (!key) {
+                // Fallback: si aún no hay clave, intenta recuperar primer carrito existente
+                try {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && k.startsWith('cart_items:')) { key = k; break; }
+                    }
+                } catch(e){}
+            }
             if (!key) return [];
             try {
-                return JSON.parse(localStorage.getItem(key) || '[]');
+                const raw = localStorage.getItem(key);
+                return raw ? (JSON.parse(raw) || []) : [];
             } catch (e) {
                 return [];
             }
