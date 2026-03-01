@@ -1104,6 +1104,16 @@
                                     showCancelButton: false
                                 });
                                 try {
+                                    if (window.PurchaseHistoryStore && orderId) {
+                                      window.PurchaseHistoryStore.record({
+                                        id: orderId,
+                                        method: 'paypal',
+                                        total: CheckoutState.orderTotal,
+                                        items: (getCart() || []).map(i=>({ title:i.title||i.name, price:i.price, qty:i.qty||i.quantity||1 }))
+                                      });
+                                    }
+                                  } catch (e) {}
+                                try {
                                     const key = getCartKey();
                                     if (key) {
                                         localStorage.setItem(key, JSON.stringify([]));
