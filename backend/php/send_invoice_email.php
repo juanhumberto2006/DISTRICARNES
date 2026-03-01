@@ -64,6 +64,7 @@ try {
   $tax = max(0, $subtotal - $base);
   $total = floatval($order['total']);
   if($total <= 0){ $total = $subtotal; }
+  $shipping = max(0, $total - ($subtotal)); // IVA asumido incluido en precios
 
   $createdAt = !empty($order['created_at']) ? strtotime($order['created_at']) : time();
   $invoiceCode = 'FAC-' . date('Ymd', $createdAt) . '-' . strtoupper(base_convert($orderId, 10, 36));
@@ -87,7 +88,8 @@ try {
     . '<table><thead><tr><th>Producto</th><th style="text-align:right;">Precio (' . htmlspecialchars($currency) . ')</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Subtotal</th></tr></thead><tbody>' . $itemsHtml . '</tbody></table>'
     . '<table class="totals">'
       . '<tr><td style="text-align:right;">Base (sin IVA): $' . number_format($base, 0, ',', '.') . '</td></tr>'
-      . '<tr><td style="text-align:right;">IVA (19% incluido): $' . number_format($tax, 0, ',', '.') . '</td></tr>'
+      . '<tr><td style="text-align:right;">IVA (incl.): $' . number_format($tax, 0, ',', '.') . '</td></tr>'
+      . '<tr><td style="text-align:right;">Envío: ' . ($shipping > 0 ? ('$' . number_format($shipping, 0, ',', '.')) : 'Gratis') . '</td></tr>'
       . '<tr><td style="text-align:right;"><strong>Total: $' . number_format($total, 0, ',', '.') . '</strong></td></tr>'
     . '</table>'
     . '<p style="margin-top:14px;color:#555;">Método de entrega: ' . htmlspecialchars($order['delivery_method']) . '</p>'

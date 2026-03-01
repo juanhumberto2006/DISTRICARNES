@@ -59,6 +59,7 @@ $taxRate = 0.0; // Ajustar si manejas IVA
 $tax = $subtotal * $taxRate;
 $total = (float)($order['total'] ?? 0);
 if ($total <= 0) { $total = $subtotal + $tax; }
+$shipping = max(0, $total - ($subtotal + $tax));
 
 // Número/Código de factura (único por orden)
 $createdAt = !empty($order['created_at']) ? strtotime($order['created_at']) : time();
@@ -166,7 +167,8 @@ $qrUrl = 'https://chart.googleapis.com/chart?chs=160x160&cht=qr&choe=UTF-8&chl='
   </table>
   <table class="totals">
     <tr><td style="text-align:right;">Subtotal: <?php echo money_es($subtotal); ?></td></tr>
-    <tr><td style="text-align:right;">Impuestos: <?php echo money_es($tax); ?></td></tr>
+    <tr><td style="text-align:right;">Impuestos (incl.): <?php echo money_es($tax); ?></td></tr>
+    <tr><td style="text-align:right;">Envío: <?php echo $shipping > 0 ? money_es($shipping) : 'Gratis'; ?></td></tr>
     <tr><td style="text-align:right;"><strong>Total: <?php echo money_es($total); ?></strong></td></tr>
   </table>
   <?php
